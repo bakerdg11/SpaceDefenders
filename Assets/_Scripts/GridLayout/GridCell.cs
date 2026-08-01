@@ -84,6 +84,14 @@ public class GridCell : MonoBehaviour
             );
         }
 
+        CollectorShip collector =
+    placedShip.GetComponent<CollectorShip>();
+
+        if (collector != null)
+        {
+            collector.InitializeCollector(shipPosition);
+        }
+
         return true;
     }
 
