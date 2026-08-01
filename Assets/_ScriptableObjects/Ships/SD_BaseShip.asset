@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c831c4d2f3b159d4989fcd35b9972c3a, type: 3}
-  m_Name: SD_Tank
+  m_Name: SD_BaseShip
   m_EditorClassIdentifier: Assembly-CSharp::ShipData
-  shipName: Tank
+  shipName: Base Ship
   description: 
   icon: {fileID: 0}
-  shipPrefab: {fileID: 6563525825127672545, guid: bee87aaf9886d1d499592fcee04f0e85, type: 3}
+  shipPrefab: {fileID: 454826032084446261, guid: f00c8df389af47046baea2d14b531550, type: 3}
   maximumHealth: 100
-  movementSpeed: 5
-  rotationSpeed: 5
+  movementSpeed: 1
+  rotationSpeed: 1
   heightOffset: 0.75
   weaponSlots: []

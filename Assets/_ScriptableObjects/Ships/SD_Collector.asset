@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c831c4d2f3b159d4989fcd35b9972c3a, type: 3}
   m_Name: SD_Collector
   m_EditorClassIdentifier: Assembly-CSharp::ShipData
-  shipName: 
+  shipName: Collector
   description: 
   icon: {fileID: 0}
-  shipPrefab: {fileID: 0}
-  maximumHealth: 0
-  movementSpeed: 0
-  rotationSpeed: 0
+  shipPrefab: {fileID: 1152354105411914, guid: cdbec52167efb6a48b63cebb3284c246, type: 3}
+  maximumHealth: 100
+  movementSpeed: 20
+  rotationSpeed: 10
   heightOffset: 0.75
   weaponSlots: []
