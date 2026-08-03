@@ -15,10 +15,13 @@ MonoBehaviour:
   shipName: Base Support
   description: 
   icon: {fileID: 0}
-  shipPrefab: {fileID: 7202087066406937147, guid: 02b03ca7eb3cd2d43b6f58d87c91161b, type: 3}
+  shipPrefab: {fileID: 8388683588741211696, guid: 3139cd92f18b6b04abb52da0f46ccd16, type: 3}
   shipPlacementCost: 15
   maximumHealth: 100
   movementSpeed: 5
-  rotationSpeed: 5
+  rotationSpeed: 200
   heightOffset: 0.75
-  weaponSlots: []
+  weaponSlots:
+  - slotName: 
+    allowedWeaponTypes: 02000000
+    startingWeapon: {fileID: 11400000, guid: 5f08ab6e76b0cf94081cc9ad3a4b8505, type: 2}

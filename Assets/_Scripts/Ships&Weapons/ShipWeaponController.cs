@@ -10,8 +10,12 @@ public class ShipWeaponController : MonoBehaviour
     [SerializeField, Min(0.05f)]
     private float targetScanInterval = 0.25f;
 
-    [Header("Weapon Position")]
-    [SerializeField] private Transform firePoint;
+    [Header("Weapon Positions")]
+    [Tooltip(
+        "Assign one or more projectile spawn points. " +
+        "Their usage depends on the weapon's Fire Pattern."
+    )]
+    [SerializeField] private Transform[] firePoints;
 
     [Header("Aiming")]
     [SerializeField, Min(0f)]
@@ -24,12 +28,14 @@ public class ShipWeaponController : MonoBehaviour
     private EnemyHealth currentTarget;
 
     private int currentAmmunition;
+    private int nextFirePointIndex;
+
     private float nextScanTime;
     private float nextFireTime;
 
     public WeaponData EquippedWeapon => equippedWeapon;
     public EnemyHealth CurrentTarget => currentTarget;
-    public float CurrentAmmunition => currentAmmunition;
+    public int CurrentAmmunition => currentAmmunition;
 
     private void Awake()
     {
@@ -117,12 +123,10 @@ public class ShipWeaponController : MonoBehaviour
 
         equippedWeapon = startingWeapon;
 
-        /*
-         * WeaponData holds the starting amount.
-         * This controller holds the amount remaining at runtime.
-         */
         currentAmmunition =
             Mathf.Max(0, equippedWeapon.Ammunition);
+
+        nextFirePointIndex = 0;
 
         Debug.Log(
             $"{name} equipped {equippedWeapon.WeaponName} " +
@@ -138,7 +142,8 @@ public class ShipWeaponController : MonoBehaviour
         }
 
         /*
-         * Collector resource behaviour takes priority over combat.
+         * Resource collection has priority over combat
+         * for any ship containing CollectorShip.
          */
         if (collectorShip != null &&
             !collectorShip.CanAttack)
@@ -146,12 +151,7 @@ public class ShipWeaponController : MonoBehaviour
             return false;
         }
 
-        /*
-         * Treat ammunition <= 0 as no ammunition remaining.
-         * If you later want infinite-ammo weapons, add a dedicated
-         * Boolean rather than using zero for two meanings.
-         */
-        if (currentAmmunition <= 0f)
+        if (currentAmmunition <= 0)
         {
             return false;
         }
@@ -285,8 +285,18 @@ public class ShipWeaponController : MonoBehaviour
             return;
         }
 
-        FireWeapon();
+        bool firedSuccessfully =
+            FireWeapon();
 
+        if (!firedSuccessfully)
+        {
+            return;
+        }
+
+        /*
+         * One attack cycle consumes one ammunition,
+         * even if a simultaneous weapon launches two projectiles.
+         */
         currentAmmunition--;
 
         nextFireTime =
@@ -321,52 +331,122 @@ public class ShipWeaponController : MonoBehaviour
         return angleToTarget <= requiredAimAngle;
     }
 
-    private void FireWeapon()
+    private bool FireWeapon()
     {
         if (currentTarget == null ||
             equippedWeapon == null)
         {
-            return;
+            return false;
         }
 
-        if (equippedWeapon.ProjectilePrefab != null)
-        {
-            FireProjectile();
-        }
-        else
-        {
-            FireInstantHit();
-        }
-    }
-
-    private void FireInstantHit()
-    {
         /*
-         * Useful for rail guns, lasers, or early testing.
+         * A missing projectile prefab means this weapon
+         * is treated as instant-hit.
          */
-        currentTarget.TakeDamage(
-            equippedWeapon.Damage
-        );
+        if (equippedWeapon.ProjectilePrefab == null)
+        {
+            return FireInstantHit();
+        }
 
-        Vector3 shotOrigin =
-            firePoint != null
-            ? firePoint.position
-            : transform.position;
+        switch (equippedWeapon.FirePattern)
+        {
+            case WeaponFirePattern.Single:
+                return FireSingleProjectile();
 
-        Debug.DrawLine(
-            shotOrigin,
-            currentTarget.transform.position,
-            Color.red,
-            0.2f
-        );
+            case WeaponFirePattern.Alternating:
+                return FireAlternatingProjectile();
+
+            case WeaponFirePattern.Simultaneous:
+                return FireSimultaneousProjectiles();
+
+            default:
+                Debug.LogWarning(
+                    $"{name} has an unsupported weapon fire pattern.",
+                    this
+                );
+
+                return false;
+        }
     }
 
-    private void FireProjectile()
+    private bool FireSingleProjectile()
     {
+        Transform selectedFirePoint =
+            GetFirstValidFirePoint();
+
+        if (selectedFirePoint == null)
+        {
+            return false;
+        }
+
+        return SpawnProjectile(selectedFirePoint);
+    }
+
+    private bool FireAlternatingProjectile()
+    {
+        Transform selectedFirePoint =
+            GetCurrentAlternatingFirePoint();
+
+        if (selectedFirePoint == null)
+        {
+            return false;
+        }
+
+        bool spawnedSuccessfully =
+            SpawnProjectile(selectedFirePoint);
+
+        if (spawnedSuccessfully)
+        {
+            AdvanceFirePoint();
+        }
+
+        return spawnedSuccessfully;
+    }
+
+    private bool FireSimultaneousProjectiles()
+    {
+        if (firePoints == null ||
+            firePoints.Length == 0)
+        {
+            Debug.LogWarning(
+                $"{name} has no fire points assigned.",
+                this
+            );
+
+            return false;
+        }
+
+        bool spawnedAtLeastOneProjectile = false;
+
+        foreach (Transform firePoint in firePoints)
+        {
+            if (firePoint == null)
+            {
+                continue;
+            }
+
+            if (SpawnProjectile(firePoint))
+            {
+                spawnedAtLeastOneProjectile = true;
+            }
+        }
+
+        return spawnedAtLeastOneProjectile;
+    }
+
+    private bool SpawnProjectile(
+        Transform selectedFirePoint)
+    {
+        if (selectedFirePoint == null ||
+            currentTarget == null ||
+            equippedWeapon == null ||
+            equippedWeapon.ProjectilePrefab == null)
+        {
+            return false;
+        }
+
         Vector3 spawnPosition =
-            firePoint != null
-            ? firePoint.position
-            : transform.position;
+            selectedFirePoint.position;
 
         Vector3 direction =
             currentTarget.transform.position -
@@ -374,7 +454,7 @@ public class ShipWeaponController : MonoBehaviour
 
         if (direction.sqrMagnitude <= 0.001f)
         {
-            return;
+            return false;
         }
 
         Quaternion projectileRotation =
@@ -383,11 +463,12 @@ public class ShipWeaponController : MonoBehaviour
                 Vector3.up
             );
 
-        GameObject projectile = Instantiate(
-            equippedWeapon.ProjectilePrefab,
-            spawnPosition,
-            projectileRotation
-        );
+        GameObject projectile =
+            Instantiate(
+                equippedWeapon.ProjectilePrefab,
+                spawnPosition,
+                projectileRotation
+            );
 
         ShipProjectile shipProjectile =
             projectile.GetComponent<ShipProjectile>();
@@ -395,11 +476,13 @@ public class ShipWeaponController : MonoBehaviour
         if (shipProjectile == null)
         {
             Debug.LogWarning(
-                $"{projectile.name} does not contain a ShipProjectile component.",
+                $"{projectile.name} does not contain " +
+                "a ShipProjectile component.",
                 projectile
             );
 
-            return;
+            Destroy(projectile);
+            return false;
         }
 
         shipProjectile.Initialize(
@@ -407,6 +490,105 @@ public class ShipWeaponController : MonoBehaviour
             equippedWeapon.Damage,
             equippedWeapon.ProjectileSpeed
         );
+
+        return true;
+    }
+
+    private bool FireInstantHit()
+    {
+        if (currentTarget == null)
+        {
+            return false;
+        }
+
+        Transform selectedFirePoint =
+            GetFirstValidFirePoint();
+
+        Vector3 shotOrigin =
+            selectedFirePoint != null
+                ? selectedFirePoint.position
+                : transform.position;
+
+        currentTarget.TakeDamage(
+            equippedWeapon.Damage
+        );
+
+        Debug.DrawLine(
+            shotOrigin,
+            currentTarget.transform.position,
+            Color.red,
+            0.2f
+        );
+
+        return true;
+    }
+
+    private Transform GetFirstValidFirePoint()
+    {
+        if (firePoints == null ||
+            firePoints.Length == 0)
+        {
+            /*
+             * Fall back to the ship root so the weapon still works
+             * while a fire point is being configured.
+             */
+            return transform;
+        }
+
+        foreach (Transform firePoint in firePoints)
+        {
+            if (firePoint != null)
+            {
+                return firePoint;
+            }
+        }
+
+        return transform;
+    }
+
+    private Transform GetCurrentAlternatingFirePoint()
+    {
+        if (firePoints == null ||
+            firePoints.Length == 0)
+        {
+            return transform;
+        }
+
+        /*
+         * Search from the current index until a valid fire point
+         * is found, in case an array element is empty.
+         */
+        for (int attempt = 0;
+             attempt < firePoints.Length;
+             attempt++)
+        {
+            int index =
+                (nextFirePointIndex + attempt) %
+                firePoints.Length;
+
+            if (firePoints[index] == null)
+            {
+                continue;
+            }
+
+            nextFirePointIndex = index;
+            return firePoints[index];
+        }
+
+        return transform;
+    }
+
+    private void AdvanceFirePoint()
+    {
+        if (firePoints == null ||
+            firePoints.Length == 0)
+        {
+            return;
+        }
+
+        nextFirePointIndex =
+            (nextFirePointIndex + 1) %
+            firePoints.Length;
     }
 
     private void OnDrawGizmosSelected()

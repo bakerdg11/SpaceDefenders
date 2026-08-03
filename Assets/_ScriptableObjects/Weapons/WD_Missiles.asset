@@ -16,12 +16,13 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   weaponType: 2
-  damage: 0
-  ammunition: 0
-  attackFireRate: 0
-  attackRange: 0
-  projectileSpeed: 0
+  damage: 40
+  ammunition: 500
+  attackFireRate: 0.1
+  attackRange: 30
+  projectileSpeed: 20
   energyDepletionRate: 0
   energyRegenerationRate: 0
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 95874187291149718, guid: d645469e6e2d1a148a9629a9774a096a, type: 3}
   weaponModelPrefab: {fileID: 0}
+  firePattern: 2

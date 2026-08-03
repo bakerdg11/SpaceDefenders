@@ -24,6 +24,7 @@ public class WeaponData : ScriptableObject
     [Header("Visuals")]
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private GameObject weaponModelPrefab;
+    [SerializeField] private WeaponFirePattern firePattern;
 
     public string WeaponName => weaponName;
     public string Description => description;
@@ -41,6 +42,7 @@ public class WeaponData : ScriptableObject
     public GameObject ProjectilePrefab => projectilePrefab;
 
     public GameObject WeaponModelPrefab => weaponModelPrefab;
+    public WeaponFirePattern FirePattern => firePattern;
 
     public float SecondsBetweenAttacks
     {

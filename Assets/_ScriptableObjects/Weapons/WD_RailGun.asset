@@ -25,3 +25,4 @@ MonoBehaviour:
   energyRegenerationRate: 0
   projectilePrefab: {fileID: 95874187291149718, guid: d645469e6e2d1a148a9629a9774a096a, type: 3}
   weaponModelPrefab: {fileID: 0}
+  firePattern: 1

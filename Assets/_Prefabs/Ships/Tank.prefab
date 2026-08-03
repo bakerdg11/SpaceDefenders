@@ -188,5 +188,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   targetScanInterval: 0.25
-  firePoint: {fileID: 5869126302306938477}
+  firePoints:
+  - {fileID: 5869126302306938477}
   requiredAimAngle: 8
