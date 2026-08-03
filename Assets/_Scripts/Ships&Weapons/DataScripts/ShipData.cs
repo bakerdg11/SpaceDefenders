@@ -14,6 +14,8 @@ public class ShipData : ScriptableObject
     [Header("Prefab")]
     [SerializeField] private GameObject shipPrefab;
 
+    [SerializeField] private int shipPlacementCost;
+
     [Header("Statistics")]
     [SerializeField, Min(1f)] private float maximumHealth;
     [SerializeField, Min(0f)] private float movementSpeed;
@@ -30,6 +32,7 @@ public class ShipData : ScriptableObject
     public Sprite Icon => icon;
 
     public GameObject ShipPrefab => shipPrefab;
+    public int ShipPlacementCost => shipPlacementCost;
 
     public float MaximumHealth => maximumHealth;
     public float MovementSpeed => movementSpeed;

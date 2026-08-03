@@ -16,6 +16,7 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   shipPrefab: {fileID: 1152354105411914, guid: cdbec52167efb6a48b63cebb3284c246, type: 3}
+  shipPlacementCost: 10
   maximumHealth: 100
   movementSpeed: 15
   rotationSpeed: 350

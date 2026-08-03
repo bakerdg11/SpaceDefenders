@@ -15,9 +15,13 @@ MonoBehaviour:
   shipName: Tank
   description: 
   icon: {fileID: 0}
-  shipPrefab: {fileID: 6563525825127672545, guid: bee87aaf9886d1d499592fcee04f0e85, type: 3}
+  shipPrefab: {fileID: 4448792749203227601, guid: 186e342cace0a094789b48b188a9d867, type: 3}
+  shipPlacementCost: 20
   maximumHealth: 100
   movementSpeed: 5
   rotationSpeed: 150
   heightOffset: 0.75
-  weaponSlots: []
+  weaponSlots:
+  - slotName: 
+    allowedWeaponTypes: 00000000
+    startingWeapon: {fileID: 11400000, guid: 547b24767ca7b4b4c898da81b98ec6db, type: 2}

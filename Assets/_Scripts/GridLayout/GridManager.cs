@@ -265,6 +265,156 @@ public class GridManager : MonoBehaviour
         );
     }
 
+    public bool CanMoveShipTo(
+    GridCell sourceCell,
+    GridCell targetCell)
+    {
+        if (sourceCell == null ||
+            targetCell == null ||
+            sourceCell == targetCell)
+        {
+            return false;
+        }
+
+        if (targetCell.CellType != GridCellType.Buildable ||
+            targetCell.IsOccupied)
+        {
+            return false;
+        }
+
+        Vector2Int targetPosition =
+            targetCell.GridPosition;
+
+        foreach (Vector2Int direction in AdjacentDirections)
+        {
+            GridCell adjacentCell = GetCell(
+                targetPosition.x + direction.x,
+                targetPosition.y + direction.y
+            );
+
+            if (adjacentCell == null)
+            {
+                continue;
+            }
+
+            /*
+             * Ignore the Viper's current cell because it will become
+             * empty immediately after the move.
+             */
+            if (adjacentCell == sourceCell)
+            {
+                continue;
+            }
+
+            if (!adjacentCell.IsOccupied)
+            {
+                continue;
+            }
+
+            if (!baseShipBlocksAdjacentCells &&
+                adjacentCell.CellType == GridCellType.BaseShip)
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+
+    public bool TryMoveViper(
+    ViperShip viper,
+    GridCell targetCell)
+    {
+        if (viper == null ||
+            targetCell == null)
+        {
+            return false;
+        }
+
+        GridCell sourceCell =
+            viper.CurrentCell;
+
+        if (sourceCell == null)
+        {
+            Debug.LogWarning(
+                $"{viper.name} does not have a current grid cell.",
+                viper
+            );
+
+            return false;
+        }
+
+        if (sourceCell.PlacedShip != viper.gameObject)
+        {
+            Debug.LogWarning(
+                $"{sourceCell.name} does not contain {viper.name}.",
+                sourceCell
+            );
+
+            return false;
+        }
+
+        if (!CanMoveShipTo(sourceCell, targetCell))
+        {
+            Debug.Log(
+                $"Cannot move {viper.name} to " +
+                $"{targetCell.GridPosition}."
+            );
+
+            return false;
+        }
+
+        ShipController shipController =
+            viper.GetComponent<ShipController>();
+
+        if (shipController == null ||
+            shipController.ShipData == null)
+        {
+            Debug.LogWarning(
+                $"{viper.name} is missing its ShipData.",
+                viper
+            );
+
+            return false;
+        }
+
+        GameObject releasedShip =
+            sourceCell.ReleasePlacedShip();
+
+        bool assignedSuccessfully =
+            targetCell.AssignExistingShip(
+                releasedShip,
+                shipController.HeightOffset
+            );
+
+        if (!assignedSuccessfully)
+        {
+            /*
+             * Restore the Viper to its original cell if something
+             * unexpectedly prevented assignment.
+             */
+            sourceCell.AssignExistingShip(
+                releasedShip,
+                shipController.HeightOffset
+            );
+
+            return false;
+        }
+
+        viper.SetCurrentCell(targetCell);
+
+        Debug.Log(
+            $"Moved {viper.name} from " +
+            $"{sourceCell.GridPosition} to " +
+            $"{targetCell.GridPosition}."
+        );
+
+        return true;
+    }
+
     /// <summary>
     /// Removes a defensive ship from a cell.
     /// The base ship cannot be removed using this method.

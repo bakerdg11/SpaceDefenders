@@ -111,6 +111,14 @@ public class GridCell : MonoBehaviour
             collectorShip.InitializeCollector(shipPosition);
         }
 
+        ViperShip viperShip =
+    placedShip.GetComponent<ViperShip>();
+
+        if (viperShip != null)
+        {
+            viperShip.InitializeViper(this);
+        }
+
         return true;
     }
 
@@ -150,6 +158,41 @@ public class GridCell : MonoBehaviour
 
         return placedShip != null;
     }
+
+    public GameObject ReleasePlacedShip()
+    {
+        GameObject releasedShip = placedShip;
+        placedShip = null;
+
+        return releasedShip;
+    }
+
+    public bool AssignExistingShip(
+        GameObject ship,
+        float heightOffset)
+    {
+        if (ship == null)
+        {
+            return false;
+        }
+
+        if (CellType != GridCellType.Buildable ||
+            IsOccupied)
+        {
+            return false;
+        }
+
+        placedShip = ship;
+
+        Vector3 newPosition =
+            transform.position +
+            Vector3.up * heightOffset;
+
+        placedShip.transform.position = newPosition;
+
+        return true;
+    }
+
 
     /// <summary>
     /// Removes the ship occupying this cell.

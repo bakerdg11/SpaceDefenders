@@ -12,6 +12,7 @@ public class BaseResourceStorage : MonoBehaviour
     private void Start()
     {
         ResourcesChanged?.Invoke(storedResources);
+        storedResources = 100;
     }
 
     public void DepositResources(int amount)
@@ -30,4 +31,35 @@ public class BaseResourceStorage : MonoBehaviour
             $"Base now has {storedResources}."
         );
     }
+
+    public bool CanAfford(int cost)
+    {
+        return cost >= 0 && storedResources >= cost;
+    }
+
+    public bool TrySpendResources(int cost)
+    {
+        if (cost < 0)
+        {
+            Debug.LogWarning("Resource cost cannot be negative.");
+            return false;
+        }
+
+        if (!CanAfford(cost))
+        {
+            return false;
+        }
+
+        storedResources -= cost;
+        ResourcesChanged?.Invoke(storedResources);
+
+        Debug.Log(
+            $"Spent {cost} resources. " +
+            $"Base now has {storedResources}."
+        );
+
+        return true;
+    }
+
+
 }

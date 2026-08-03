@@ -14,6 +14,7 @@ public class ShipPlacementManager : MonoBehaviour
     [SerializeField, Min(1f)] private float raycastDistance = 500f;
 
     private ShipData selectedShip;
+    [SerializeField] private BaseResourceStorage baseResourceStorage;
 
     public ShipData SelectedShip => selectedShip;
     public bool IsPlacingShip => selectedShip != null;
@@ -130,23 +131,82 @@ public class ShipPlacementManager : MonoBehaviour
         TryPlaceSelectedShip(selectedCell);
     }
 
+    private void FindBaseStorageIfNeeded()
+    {
+        if (baseResourceStorage == null)
+        {
+            baseResourceStorage =
+                FindAnyObjectByType<BaseResourceStorage>();
+        }
+    }
 
     private void TryPlaceSelectedShip(GridCell selectedCell)
     {
-        if (selectedShip == null)
+        if (selectedShip == null || selectedCell == null)
         {
             return;
         }
 
-        bool placementSucceeded = gridManager.TryPlaceShipAt(selectedCell, selectedShip);
+        FindBaseStorageIfNeeded();
+
+        if (baseResourceStorage == null)
+        {
+            Debug.LogError(
+                "Cannot purchase ship because BaseResourceStorage was not found.",
+                this
+            );
+
+            return;
+        }
+
+        int placementCost = selectedShip.ShipPlacementCost;
+
+        if (!baseResourceStorage.CanAfford(placementCost))
+        {
+            Debug.Log(
+                $"Not enough resources to place {selectedShip.ShipName}. " +
+                $"Cost: {placementCost}, " +
+                $"Available: {baseResourceStorage.StoredResources}"
+            );
+
+            return;
+        }
+
+        bool placementSucceeded =
+            gridManager.TryPlaceShipAt(
+                selectedCell,
+                selectedShip
+            );
 
         if (!placementSucceeded)
         {
-            Debug.Log($"Could not place {selectedShip.ShipName} on " + $"{selectedCell.GridPosition}. The tile may be occupied, " + "reserved or directly beside another ship.");
+            Debug.Log(
+                $"Could not place {selectedShip.ShipName} on " +
+                $"{selectedCell.GridPosition}. The tile may be occupied, " +
+                "reserved, or beside another ship."
+            );
+
             return;
         }
 
-        Debug.Log($"Placed {selectedShip.ShipName} on " + $"{selectedCell.GridPosition}.");
+        bool paymentSucceeded =
+            baseResourceStorage.TrySpendResources(placementCost);
+
+        if (!paymentSucceeded)
+        {
+            Debug.LogError(
+                $"{selectedShip.ShipName} was placed, but its resource " +
+                "cost could not be deducted.",
+                this
+            );
+
+            return;
+        }
+
+        Debug.Log(
+            $"Placed {selectedShip.ShipName} for " +
+            $"{placementCost} resources."
+        );
 
         selectedShip = null;
     }

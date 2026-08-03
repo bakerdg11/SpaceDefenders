@@ -2,55 +2,69 @@ using UnityEngine;
 
 public class EnemyPatrol : MonoBehaviour
 {
-    [Header("Patrol Points")]
-    [SerializeField] private Transform point1;
-    [SerializeField] private Transform point2;
-
     [Header("Movement")]
-    [SerializeField, Min(0.1f)] private float movementSpeed = 3f;
-    [SerializeField, Min(0.01f)] private float stoppingDistance = 0.1f;
-    [SerializeField, Min(0f)] private float rotationSpeed = 360f;
+    [SerializeField, Min(0.1f)]
+    private float movementSpeed = 3f;
 
-    private Transform currentTarget;
+    [SerializeField, Min(0.01f)]
+    private float stoppingDistance = 0.1f;
 
-    private void Start()
-    {
-        if (point1 == null || point2 == null)
-        {
-            Debug.LogError(
-                $"{name} is missing patrol points.",
-                this
-            );
+    [SerializeField, Min(0f)]
+    private float rotationSpeed = 360f;
 
-            enabled = false;
-            return;
-        }
+    private Transform startPoint;
+    private Transform destinationPoint;
 
-        currentTarget = point2;
-    }
+    private bool hasBeenInitialized;
 
     private void Update()
     {
-        MoveTowardsTarget();
+        if (!hasBeenInitialized)
+        {
+            return;
+        }
+
+        MoveToDestination();
     }
 
-    private void MoveTowardsTarget()
+    public void Initialize(
+        Transform newStartPoint,
+        Transform newDestinationPoint)
     {
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            currentTarget.position,
-            movementSpeed * Time.deltaTime
-        );
+        if (newStartPoint == null ||
+            newDestinationPoint == null)
+        {
+            Debug.LogError(
+                $"{name} received invalid patrol points.",
+                this
+            );
 
+            return;
+        }
+
+        startPoint = newStartPoint;
+        destinationPoint = newDestinationPoint;
+
+        transform.position = startPoint.position;
+
+        hasBeenInitialized = true;
+    }
+
+    private void MoveToDestination()
+    {
         Vector3 direction =
-            currentTarget.position - transform.position;
+            destinationPoint.position -
+            transform.position;
 
         direction.y = 0f;
 
         if (direction.sqrMagnitude > 0.001f)
         {
             Quaternion targetRotation =
-                Quaternion.LookRotation(direction);
+                Quaternion.LookRotation(
+                    direction.normalized,
+                    Vector3.up
+                );
 
             transform.rotation =
                 Quaternion.RotateTowards(
@@ -60,17 +74,22 @@ public class EnemyPatrol : MonoBehaviour
                 );
         }
 
-        float distance = Vector3.Distance(
-            transform.position,
-            currentTarget.position
-        );
+        transform.position =
+            Vector3.MoveTowards(
+                transform.position,
+                destinationPoint.position,
+                movementSpeed * Time.deltaTime
+            );
 
-        if (distance <= stoppingDistance)
+        float distanceToDestination =
+            Vector3.Distance(
+                transform.position,
+                destinationPoint.position
+            );
+
+        if (distanceToDestination <= stoppingDistance)
         {
-            currentTarget =
-                currentTarget == point1
-                ? point2
-                : point1;
+            Destroy(gameObject);
         }
     }
 }
