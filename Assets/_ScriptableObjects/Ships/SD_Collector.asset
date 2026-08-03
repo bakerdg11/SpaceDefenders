@@ -17,7 +17,10 @@ MonoBehaviour:
   icon: {fileID: 0}
   shipPrefab: {fileID: 1152354105411914, guid: cdbec52167efb6a48b63cebb3284c246, type: 3}
   maximumHealth: 100
-  movementSpeed: 20
-  rotationSpeed: 10
+  movementSpeed: 15
+  rotationSpeed: 350
   heightOffset: 0.75
-  weaponSlots: []
+  weaponSlots:
+  - slotName: 
+    allowedWeaponTypes: 05000000
+    startingWeapon: {fileID: 11400000, guid: 922b6a11c21fe7f4abc663fe5515d8c8, type: 2}

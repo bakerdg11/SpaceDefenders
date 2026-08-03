@@ -10,9 +10,6 @@ public class GridManager : MonoBehaviour
     [SerializeField, Min(0.1f)] private float cellSize = 2f;
     [SerializeField] private GridCell cellPrefab;
 
-    [Header("Defensive Ship Placement")]
-    [SerializeField] private float defensiveShipHeight = 0.75f;
-
     [Tooltip(
         "Optional parent for spawned defensive ships. " +
         "Leave empty to place them at the scene root."

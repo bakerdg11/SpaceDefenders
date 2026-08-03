@@ -14,7 +14,7 @@ public class WeaponData : ScriptableObject
 
     [Header("Combat")]
     [SerializeField] private float damage;
-    [SerializeField] private float ammunition;
+    [SerializeField] private int ammunition;
     [SerializeField] private float attackFireRate;
     [SerializeField] private float attackRange;
     [SerializeField] private float projectileSpeed;
@@ -31,7 +31,7 @@ public class WeaponData : ScriptableObject
     public WeaponType WeaponType => weaponType;
 
     public float Damage => damage;
-    public float Ammunition => ammunition;
+    public int Ammunition => ammunition;
     public float AttackFireRate => attackFireRate;
     public float AttackRange => attackRange;
     public float ProjectileSpeed => projectileSpeed;

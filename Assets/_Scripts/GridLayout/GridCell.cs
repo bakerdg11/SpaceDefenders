@@ -43,18 +43,37 @@ public class GridCell : MonoBehaviour
     /// The GridManager should validate placement before calling this.
     /// </summary>
     public bool TryPlaceShip(
-        ShipData shipData,
-        Transform shipParent = null)
+     ShipData shipData,
+     Transform shipParent = null)
     {
         if (CellType != GridCellType.Buildable)
         {
             return false;
         }
 
-        if (IsOccupied ||
-            shipData == null ||
-            shipData.ShipPrefab == null)
+        if (IsOccupied)
         {
+            return false;
+        }
+
+        if (shipData == null)
+        {
+            Debug.LogWarning(
+                $"Cannot place a ship on {name}: ShipData is null.",
+                this
+            );
+
+            return false;
+        }
+
+        if (shipData.ShipPrefab == null)
+        {
+            Debug.LogWarning(
+                $"Cannot place {shipData.ShipName} on {name}: " +
+                "its ShipData does not have a Ship Prefab assigned.",
+                shipData
+            );
+
             return false;
         }
 
@@ -69,12 +88,12 @@ public class GridCell : MonoBehaviour
             shipParent
         );
 
-        ShipController controller =
+        ShipController shipController =
             placedShip.GetComponent<ShipController>();
 
-        if (controller != null)
+        if (shipController != null)
         {
-            controller.Initialize(shipData);
+            shipController.Initialize(shipData);
         }
         else
         {
@@ -84,12 +103,12 @@ public class GridCell : MonoBehaviour
             );
         }
 
-        CollectorShip collector =
-    placedShip.GetComponent<CollectorShip>();
+        CollectorShip collectorShip =
+            placedShip.GetComponent<CollectorShip>();
 
-        if (collector != null)
+        if (collectorShip != null)
         {
-            collector.InitializeCollector(shipPosition);
+            collectorShip.InitializeCollector(shipPosition);
         }
 
         return true;

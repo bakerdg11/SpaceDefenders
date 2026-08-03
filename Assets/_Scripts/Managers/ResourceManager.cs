@@ -34,4 +34,22 @@ public static class ResourceManager
 
         return null;
     }
+
+    public static bool HasAvailableResource()
+    {
+        availableResources.RemoveAll(resource => resource == null);
+
+        foreach (ResourcePickup resource in availableResources)
+        {
+            if (!resource.IsReserved)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+
 }

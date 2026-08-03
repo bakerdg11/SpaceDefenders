@@ -8,8 +8,18 @@ public class ShipController : MonoBehaviour
 
     public ShipData ShipData => shipData;
     public float CurrentHealth => currentHealth;
+
     public float MaximumHealth =>
         shipData != null ? shipData.MaximumHealth : 0f;
+
+    public float MovementSpeed =>
+        shipData != null ? shipData.MovementSpeed : 0f;
+
+    public float RotationSpeed =>
+        shipData != null ? shipData.RotationSpeed : 0f;
+
+    public float HeightOffset =>
+        shipData != null ? shipData.HeightOffset : 0f;
 
     private void Awake()
     {

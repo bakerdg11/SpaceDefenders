@@ -12,7 +12,9 @@ GameObject:
   - component: {fileID: 33892153876024192}
   - component: {fileID: 23212936114598752}
   - component: {fileID: -2998482177141046425}
+  - component: {fileID: 5896196066476530088}
   - component: {fileID: 3815917734068659632}
+  - component: {fileID: 3328639796184676620}
   m_Layer: 0
   m_Name: Ship_Collector
   m_TagString: Untagged
@@ -32,7 +34,8 @@ Transform:
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5834039330255502343}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &33892153876024192
@@ -113,6 +116,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 15.435201, y: 7.477126, z: 19.8232}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5896196066476530088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152354105411914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aba2f62d07ce285449cddca8543eb16d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShipController
+  shipData: {fileID: 11400000, guid: 5200d50459305f642960820dfbb8904c, type: 2}
 --- !u!114 &3815917734068659632
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,7 +141,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5466e3e4b7174e6409fb1f0e24fb9560, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CollectorShip
-  movementSpeed: 4
   stoppingDistance: 0.25
-  flightHeight: 0.75
   maximumCapacity: 100
+--- !u!114 &3328639796184676620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152354105411914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2e1d3defcc1bd544b695209911df1a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShipWeaponController
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  targetScanInterval: 0.25
+  firePoint: {fileID: 5834039330255502343}
+  requiredAimAngle: 8
+--- !u!1 &6409361185043556010
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5834039330255502343}
+  m_Layer: 0
+  m_Name: FirePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5834039330255502343
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6409361185043556010}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.000000021855694, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 12.16}
+  m_LocalScale: {x: 6.6666665, y: 6.6666665, z: 6.6666665}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4657497382128574}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
