@@ -168,7 +168,7 @@ MonoBehaviour:
   cellSize: 6
   cellPrefab: {fileID: 1676522455042762109, guid: b911adc8a2892544f8459401c1f16dbd, type: 3}
   defensiveShipsParent: {fileID: 0}
-  baseShipPrefab: {fileID: 454826032084446261, guid: f00c8df389af47046baea2d14b531550, type: 3}
+  baseShipPrefab: {fileID: 7623242942579338485, guid: c685c7799508a73408323177df45988d, type: 3}
   baseShipHeight: 0.75
   baseShipBlocksAdjacentCells: 1
   baseShipParent: {fileID: 0}
@@ -2595,7 +2595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df894a5642536a641b09f0f67f67f7c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HUD
-  baseResourceStorage: {fileID: 0}
+  baseResourceStorage: {fileID: 4292555222249351983, guid: c685c7799508a73408323177df45988d, type: 3}
   resourcesHeldText: {fileID: 247314661}
 --- !u!1 &1213412703
 GameObject:
@@ -2751,7 +2751,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1221483203
 RectTransform:
   m_ObjectHideFlags: 0

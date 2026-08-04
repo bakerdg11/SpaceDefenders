@@ -340,33 +340,99 @@ public class ShipWeaponController : MonoBehaviour
         }
 
         /*
-         * A missing projectile prefab means this weapon
-         * is treated as instant-hit.
+         * Beam weapons apply damage immediately and display
+         * a temporary Line Renderer effect.
          */
-        if (equippedWeapon.ProjectilePrefab == null)
+        if (equippedWeapon.BeamPrefab != null)
         {
-            return FireInstantHit();
+            return FireBeam();
         }
 
-        switch (equippedWeapon.FirePattern)
+        /*
+         * Weapons with projectile prefabs use their selected
+         * projectile firing pattern.
+         */
+        if (equippedWeapon.ProjectilePrefab != null)
         {
-            case WeaponFirePattern.Single:
-                return FireSingleProjectile();
+            switch (equippedWeapon.FirePattern)
+            {
+                case WeaponFirePattern.Single:
+                    return FireSingleProjectile();
 
-            case WeaponFirePattern.Alternating:
-                return FireAlternatingProjectile();
+                case WeaponFirePattern.Alternating:
+                    return FireAlternatingProjectile();
 
-            case WeaponFirePattern.Simultaneous:
-                return FireSimultaneousProjectiles();
+                case WeaponFirePattern.Simultaneous:
+                    return FireSimultaneousProjectiles();
 
-            default:
-                Debug.LogWarning(
-                    $"{name} has an unsupported weapon fire pattern.",
-                    this
-                );
+                default:
+                    Debug.LogWarning(
+                        $"{name} has an unsupported fire pattern.",
+                        this
+                    );
 
-                return false;
+                    return false;
+            }
         }
+
+        /*
+         * Fallback for instant-hit weapons with no visual prefab.
+         */
+        return FireInstantHit();
+    }
+
+    private bool FireBeam()
+    {
+        if (currentTarget == null ||
+            equippedWeapon == null ||
+            equippedWeapon.BeamPrefab == null)
+        {
+            return false;
+        }
+
+        Transform selectedFirePoint =
+            GetFirstValidFirePoint();
+
+        if (selectedFirePoint == null)
+        {
+            return false;
+        }
+
+        GameObject beamObject = Instantiate(
+            equippedWeapon.BeamPrefab,
+            selectedFirePoint.position,
+            Quaternion.identity
+        );
+
+        LaserBeam laserBeam =
+            beamObject.GetComponent<LaserBeam>();
+
+        if (laserBeam == null)
+        {
+            Debug.LogWarning(
+                $"{beamObject.name} does not contain LaserBeam.",
+                beamObject
+            );
+
+            Destroy(beamObject);
+            return false;
+        }
+
+        laserBeam.Initialize(
+            selectedFirePoint,
+            currentTarget.transform,
+            equippedWeapon.BeamDuration
+        );
+
+        /*
+         * Laser damage happens immediately.
+         * The beam object is only the visual representation.
+         */
+        currentTarget.TakeDamage(
+            equippedWeapon.Damage
+        );
+
+        return true;
     }
 
     private bool FireSingleProjectile()
