@@ -23,6 +23,8 @@ MonoBehaviour:
   projectileSpeed: 200
   energyDepletionRate: 0
   energyRegenerationRate: 0
-  projectilePrefab: {fileID: 95874187291149718, guid: d645469e6e2d1a148a9629a9774a096a, type: 3}
+  projectilePrefab: {fileID: 528523047861790421, guid: 6fa69f6ffb423c4448c779df153adbc0, type: 3}
   weaponModelPrefab: {fileID: 0}
+  beamPrefab: {fileID: 0}
+  beamDuration: 0.1
   firePattern: 1
