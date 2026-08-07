@@ -21,8 +21,11 @@ MonoBehaviour:
   attackFireRate: 0.1
   attackRange: 30
   projectileSpeed: 20
+  sequentialFireDelay: 0.25
   energyDepletionRate: 0
   energyRegenerationRate: 0
-  projectilePrefab: {fileID: 95874187291149718, guid: d645469e6e2d1a148a9629a9774a096a, type: 3}
+  projectilePrefab: {fileID: 1292670806736429114, guid: 47ade89a3ffbc0748b71757b8c239f46, type: 3}
   weaponModelPrefab: {fileID: 0}
-  firePattern: 2
+  beamPrefab: {fileID: 0}
+  beamDuration: 0.1
+  firePattern: 3

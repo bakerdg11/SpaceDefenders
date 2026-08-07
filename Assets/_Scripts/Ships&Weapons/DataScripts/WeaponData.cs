@@ -18,6 +18,7 @@ public class WeaponData : ScriptableObject
     [SerializeField] private float attackFireRate;
     [SerializeField] private float attackRange;
     [SerializeField] private float projectileSpeed;
+    [SerializeField] private float sequentialFireDelay = 0.25f;
     [SerializeField] private float energyDepletionRate;
     [SerializeField] private float energyRegenerationRate;
 
@@ -38,11 +39,11 @@ public class WeaponData : ScriptableObject
     public float AttackFireRate => attackFireRate;
     public float AttackRange => attackRange;
     public float ProjectileSpeed => projectileSpeed;
+    public float SequentialFireDelay => sequentialFireDelay;
     public float EnergyDepletionRate => energyDepletionRate;
     public float EnergyRegenerationRate => energyRegenerationRate;
 
     public GameObject ProjectilePrefab => projectilePrefab;
-
     public GameObject WeaponModelPrefab => weaponModelPrefab;
     public GameObject BeamPrefab => beamPrefab;
     public float BeamDuration => beamDuration;

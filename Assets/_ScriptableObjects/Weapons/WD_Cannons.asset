@@ -18,10 +18,13 @@ MonoBehaviour:
   weaponType: 0
   damage: 35
   ammunition: 20
-  attackFireRate: 0.5
+  attackFireRate: 0.3
   attackRange: 30
-  projectileSpeed: 125
+  projectileSpeed: 175
   energyDepletionRate: 0
   energyRegenerationRate: 0
   projectilePrefab: {fileID: 95874187291149718, guid: d645469e6e2d1a148a9629a9774a096a, type: 3}
   weaponModelPrefab: {fileID: 0}
+  beamPrefab: {fileID: 0}
+  beamDuration: 0.1
+  firePattern: 0

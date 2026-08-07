@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShipProjectile
   hitDistance: 0.2
-  maximumLifetime: 10
+  maximumLifetime: 5
 --- !u!135 &4373210439555806199
 SphereCollider:
   m_ObjectHideFlags: 0

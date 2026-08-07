@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(ShipController))]
@@ -5,21 +6,13 @@ public class ShipWeaponController : MonoBehaviour
 {
     [Header("Targeting")]
     [SerializeField] private LayerMask enemyLayer;
-
-    [Tooltip("How often this ship searches for an enemy.")]
-    [SerializeField, Min(0.05f)]
-    private float targetScanInterval = 0.25f;
+    [SerializeField] private float targetScanInterval = 0.25f;
 
     [Header("Weapon Positions")]
-    [Tooltip(
-        "Assign one or more projectile spawn points. " +
-        "Their usage depends on the weapon's Fire Pattern."
-    )]
     [SerializeField] private Transform[] firePoints;
 
     [Header("Aiming")]
-    [SerializeField, Min(0f)]
-    private float requiredAimAngle = 8f;
+    [SerializeField] private float requiredAimAngle = 8f;
 
     private ShipController shipController;
     private CollectorShip collectorShip;
@@ -32,6 +25,8 @@ public class ShipWeaponController : MonoBehaviour
 
     private float nextScanTime;
     private float nextFireTime;
+
+    private bool isSequentialFiring;
 
     public WeaponData EquippedWeapon => equippedWeapon;
     public EnemyHealth CurrentTarget => currentTarget;
@@ -69,69 +64,41 @@ public class ShipWeaponController : MonoBehaviour
 
     private void LoadStartingWeapon()
     {
-        if (shipController == null ||
-            shipController.ShipData == null)
+        if (shipController == null || shipController.ShipData == null)
         {
-            Debug.LogError(
-                $"{name} cannot load a weapon because ShipData is missing.",
-                this
-            );
-
+            Debug.LogError($"{name} cannot load a weapon because ShipData is missing.", this);
             return;
         }
 
-        ShipWeaponSlot[] weaponSlots =
-            shipController.ShipData.WeaponSlots;
+        ShipWeaponSlot[] weaponSlots = shipController.ShipData.WeaponSlots;
 
-        if (weaponSlots == null ||
-            weaponSlots.Length == 0)
+        if (weaponSlots == null || weaponSlots.Length == 0)
         {
-            Debug.LogWarning(
-                $"{name} has no weapon slots configured.",
-                this
-            );
-
+            Debug.LogWarning($"{name} has no weapon slots configured.", this);
             return;
         }
 
         ShipWeaponSlot firstSlot = weaponSlots[0];
 
-        if (firstSlot == null ||
-            firstSlot.StartingWeapon == null)
+        if (firstSlot == null || firstSlot.StartingWeapon == null)
         {
-            Debug.LogWarning(
-                $"{name}'s first weapon slot has no starting weapon.",
-                this
-            );
-
+            Debug.LogWarning($"{name}'s first weapon slot has no starting weapon.", this);
             return;
         }
 
-        WeaponData startingWeapon =
-            firstSlot.StartingWeapon;
+        WeaponData startingWeapon = firstSlot.StartingWeapon;
 
         if (!firstSlot.CanEquip(startingWeapon))
         {
-            Debug.LogError(
-                $"{startingWeapon.WeaponName} is not allowed " +
-                $"in {name}'s first weapon slot.",
-                this
-            );
-
+            Debug.LogError($"{startingWeapon.WeaponName} is not allowed in {name}'s first weapon slot.", this);
             return;
         }
 
         equippedWeapon = startingWeapon;
-
-        currentAmmunition =
-            Mathf.Max(0, equippedWeapon.Ammunition);
-
+        currentAmmunition = Mathf.Max(0, equippedWeapon.Ammunition);
         nextFirePointIndex = 0;
 
-        Debug.Log(
-            $"{name} equipped {equippedWeapon.WeaponName} " +
-            $"with {currentAmmunition} ammunition."
-        );
+        Debug.Log($"{name} equipped {equippedWeapon.WeaponName} with {currentAmmunition} ammunition.");
     }
 
     private bool CanCurrentlyAttack()
@@ -141,12 +108,8 @@ public class ShipWeaponController : MonoBehaviour
             return false;
         }
 
-        /*
-         * Resource collection has priority over combat
-         * for any ship containing CollectorShip.
-         */
-        if (collectorShip != null &&
-            !collectorShip.CanAttack)
+        // Resource collection takes priority over attacking.
+        if (collectorShip != null && !collectorShip.CanAttack)
         {
             return false;
         }
@@ -161,8 +124,7 @@ public class ShipWeaponController : MonoBehaviour
 
     private void UpdateTarget()
     {
-        if (currentTarget != null &&
-            IsTargetValid(currentTarget))
+        if (currentTarget != null && IsTargetValid(currentTarget))
         {
             return;
         }
@@ -174,40 +136,27 @@ public class ShipWeaponController : MonoBehaviour
             return;
         }
 
-        nextScanTime =
-            Time.time + targetScanInterval;
-
+        nextScanTime = Time.time + targetScanInterval;
         FindClosestTarget();
     }
 
     private void FindClosestTarget()
     {
-        Collider[] enemyColliders =
-            Physics.OverlapSphere(
-                transform.position,
-                equippedWeapon.AttackRange,
-                enemyLayer
-            );
+        Collider[] enemyColliders = Physics.OverlapSphere(transform.position, equippedWeapon.AttackRange, enemyLayer);
 
         EnemyHealth closestEnemy = null;
-
-        float closestDistanceSquared =
-            float.PositiveInfinity;
+        float closestDistanceSquared = float.PositiveInfinity;
 
         foreach (Collider enemyCollider in enemyColliders)
         {
-            EnemyHealth enemy =
-                enemyCollider.GetComponentInParent<EnemyHealth>();
+            EnemyHealth enemy = enemyCollider.GetComponentInParent<EnemyHealth>();
 
-            if (enemy == null ||
-                enemy.CurrentHealth <= 0f)
+            if (enemy == null || enemy.CurrentHealth <= 0f)
             {
                 continue;
             }
 
-            float distanceSquared =
-                (enemy.transform.position -
-                 transform.position).sqrMagnitude;
+            float distanceSquared = (enemy.transform.position - transform.position).sqrMagnitude;
 
             if (distanceSquared >= closestDistanceSquared)
             {
@@ -223,29 +172,20 @@ public class ShipWeaponController : MonoBehaviour
 
     private bool IsTargetValid(EnemyHealth target)
     {
-        if (target == null ||
-            target.CurrentHealth <= 0f)
+        if (target == null || target.CurrentHealth <= 0f)
         {
             return false;
         }
 
-        float attackRangeSquared =
-            equippedWeapon.AttackRange *
-            equippedWeapon.AttackRange;
-
-        float distanceSquared =
-            (target.transform.position -
-             transform.position).sqrMagnitude;
+        float attackRangeSquared = equippedWeapon.AttackRange * equippedWeapon.AttackRange;
+        float distanceSquared = (target.transform.position - transform.position).sqrMagnitude;
 
         return distanceSquared <= attackRangeSquared;
     }
 
     private void AimAtTarget()
     {
-        Vector3 directionToTarget =
-            currentTarget.transform.position -
-            transform.position;
-
+        Vector3 directionToTarget = currentTarget.transform.position - transform.position;
         directionToTarget.y = 0f;
 
         if (directionToTarget.sqrMagnitude <= 0.001f)
@@ -253,19 +193,8 @@ public class ShipWeaponController : MonoBehaviour
             return;
         }
 
-        Quaternion targetRotation =
-            Quaternion.LookRotation(
-                directionToTarget.normalized,
-                Vector3.up
-            );
-
-        transform.rotation =
-            Quaternion.RotateTowards(
-                transform.rotation,
-                targetRotation,
-                shipController.RotationSpeed *
-                Time.deltaTime
-            );
+        Quaternion targetRotation = Quaternion.LookRotation(directionToTarget.normalized, Vector3.up);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, shipController.RotationSpeed * Time.deltaTime);
     }
 
     private void TryFire()
@@ -285,36 +214,24 @@ public class ShipWeaponController : MonoBehaviour
             return;
         }
 
-        bool firedSuccessfully =
-            FireWeapon();
+        bool firedSuccessfully = FireWeapon();
 
         if (!firedSuccessfully)
         {
             return;
         }
 
-        /*
-         * One attack cycle consumes one ammunition,
-         * even if a simultaneous weapon launches two projectiles.
-         */
+        // One firing cycle uses one ammunition, even if multiple projectiles are fired.
         currentAmmunition--;
 
-        nextFireTime =
-            Time.time +
-            equippedWeapon.SecondsBetweenAttacks;
+        nextFireTime = Time.time + equippedWeapon.SecondsBetweenAttacks;
 
-        Debug.Log(
-            $"{name} fired {equippedWeapon.WeaponName}. " +
-            $"Ammo remaining: {currentAmmunition}"
-        );
+        Debug.Log($"{name} fired {equippedWeapon.WeaponName}. Ammo remaining: {currentAmmunition}");
     }
 
     private bool IsAimedAtTarget()
     {
-        Vector3 directionToTarget =
-            currentTarget.transform.position -
-            transform.position;
-
+        Vector3 directionToTarget = currentTarget.transform.position - transform.position;
         directionToTarget.y = 0f;
 
         if (directionToTarget.sqrMagnitude <= 0.001f)
@@ -322,36 +239,22 @@ public class ShipWeaponController : MonoBehaviour
             return true;
         }
 
-        float angleToTarget =
-            Vector3.Angle(
-                transform.forward,
-                directionToTarget.normalized
-            );
-
+        float angleToTarget = Vector3.Angle(transform.forward, directionToTarget.normalized);
         return angleToTarget <= requiredAimAngle;
     }
 
     private bool FireWeapon()
     {
-        if (currentTarget == null ||
-            equippedWeapon == null)
+        if (currentTarget == null || equippedWeapon == null)
         {
             return false;
         }
 
-        /*
-         * Beam weapons apply damage immediately and display
-         * a temporary Line Renderer effect.
-         */
         if (equippedWeapon.BeamPrefab != null)
         {
             return FireBeam();
         }
 
-        /*
-         * Weapons with projectile prefabs use their selected
-         * projectile firing pattern.
-         */
         if (equippedWeapon.ProjectilePrefab != null)
         {
             switch (equippedWeapon.FirePattern)
@@ -365,80 +268,53 @@ public class ShipWeaponController : MonoBehaviour
                 case WeaponFirePattern.Simultaneous:
                     return FireSimultaneousProjectiles();
 
-                default:
-                    Debug.LogWarning(
-                        $"{name} has an unsupported fire pattern.",
-                        this
-                    );
+                case WeaponFirePattern.Sequential:
+                    return StartSequentialProjectiles();
 
+                default:
+                    Debug.LogWarning($"{name} has an unsupported fire pattern.", this);
                     return false;
             }
         }
 
-        /*
-         * Fallback for instant-hit weapons with no visual prefab.
-         */
         return FireInstantHit();
     }
 
     private bool FireBeam()
     {
-        if (currentTarget == null ||
-            equippedWeapon == null ||
-            equippedWeapon.BeamPrefab == null)
+        if (currentTarget == null || equippedWeapon == null || equippedWeapon.BeamPrefab == null)
         {
             return false;
         }
 
-        Transform selectedFirePoint =
-            GetFirstValidFirePoint();
+        Transform selectedFirePoint = GetFirstValidFirePoint();
 
         if (selectedFirePoint == null)
         {
             return false;
         }
 
-        GameObject beamObject = Instantiate(
-            equippedWeapon.BeamPrefab,
-            selectedFirePoint.position,
-            Quaternion.identity
-        );
-
-        LaserBeam laserBeam =
-            beamObject.GetComponent<LaserBeam>();
+        GameObject beamObject = Instantiate(equippedWeapon.BeamPrefab, selectedFirePoint.position, Quaternion.identity);
+        LaserBeam laserBeam = beamObject.GetComponent<LaserBeam>();
 
         if (laserBeam == null)
         {
-            Debug.LogWarning(
-                $"{beamObject.name} does not contain LaserBeam.",
-                beamObject
-            );
-
+            Debug.LogWarning($"{beamObject.name} does not contain LaserBeam.", beamObject);
             Destroy(beamObject);
             return false;
         }
 
-        laserBeam.Initialize(
-            selectedFirePoint,
-            currentTarget.transform,
-            equippedWeapon.BeamDuration
-        );
+        laserBeam.Initialize(selectedFirePoint, currentTarget.transform, equippedWeapon.BeamDuration);
 
-        /*
-         * Laser damage happens immediately.
-         * The beam object is only the visual representation.
-         */
-        currentTarget.TakeDamage(
-            equippedWeapon.Damage
-        );
+        // Beam damage is instantaneous. The LaserBeam prefab is only the visual effect.
+        currentTarget.TakeDamage(equippedWeapon.Damage);
 
         return true;
     }
 
     private bool FireSingleProjectile()
     {
-        Transform selectedFirePoint =
-            GetFirstValidFirePoint();
+        Transform selectedFirePoint = GetFirstValidFirePoint();
 
         if (selectedFirePoint == null)
         {
@@ -450,16 +326,14 @@ public class ShipWeaponController : MonoBehaviour
 
     private bool FireAlternatingProjectile()
     {
-        Transform selectedFirePoint =
-            GetCurrentAlternatingFirePoint();
+        Transform selectedFirePoint = GetCurrentAlternatingFirePoint();
 
         if (selectedFirePoint == null)
         {
             return false;
         }
 
-        bool spawnedSuccessfully =
-            SpawnProjectile(selectedFirePoint);
+        bool spawnedSuccessfully = SpawnProjectile(selectedFirePoint);
 
         if (spawnedSuccessfully)
         {
@@ -471,14 +345,9 @@ public class ShipWeaponController : MonoBehaviour
 
     private bool FireSimultaneousProjectiles()
     {
-        if (firePoints == null ||
-            firePoints.Length == 0)
+        if (firePoints == null || firePoints.Length == 0)
         {
-            Debug.LogWarning(
-                $"{name} has no fire points assigned.",
-                this
-            );
-
+            Debug.LogWarning($"{name} has no fire points assigned.", this);
             return false;
         }
 
@@ -500,62 +369,73 @@ public class ShipWeaponController : MonoBehaviour
         return spawnedAtLeastOneProjectile;
     }
 
-    private bool SpawnProjectile(
-        Transform selectedFirePoint)
+    private bool StartSequentialProjectiles()
     {
-        if (selectedFirePoint == null ||
-            currentTarget == null ||
-            equippedWeapon == null ||
-            equippedWeapon.ProjectilePrefab == null)
+        if (isSequentialFiring)
         {
             return false;
         }
 
-        Vector3 spawnPosition =
-            selectedFirePoint.position;
+        if (firePoints == null || firePoints.Length < 2)
+        {
+            Debug.LogWarning($"{name} needs at least 2 fire points for Sequential firing.", this);
+            return false;
+        }
 
-        Vector3 direction =
-            currentTarget.transform.position -
-            spawnPosition;
+        if (firePoints[0] == null || firePoints[1] == null)
+        {
+            Debug.LogWarning($"{name} has an empty sequential fire point.", this);
+            return false;
+        }
+
+        StartCoroutine(FireSequentialProjectiles());
+        return true;
+    }
+
+    private IEnumerator FireSequentialProjectiles()
+    {
+        isSequentialFiring = true;
+
+        SpawnProjectile(firePoints[0]);
+
+        yield return new WaitForSeconds(equippedWeapon.SequentialFireDelay);
+
+        if (currentTarget != null && currentTarget.CurrentHealth > 0f)
+        {
+            SpawnProjectile(firePoints[1]);
+        }
+
+        isSequentialFiring = false;
+    }
+
+    private bool SpawnProjectile(Transform selectedFirePoint)
+    {
+        if (selectedFirePoint == null || currentTarget == null || equippedWeapon == null || equippedWeapon.ProjectilePrefab == null)
+        {
+            return false;
+        }
+
+        Vector3 spawnPosition = selectedFirePoint.position;
+        Vector3 direction = currentTarget.transform.position - spawnPosition;
 
         if (direction.sqrMagnitude <= 0.001f)
         {
             return false;
         }
 
-        Quaternion projectileRotation =
-            Quaternion.LookRotation(
-                direction.normalized,
-                Vector3.up
-            );
+        Quaternion projectileRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+        GameObject projectile = Instantiate(equippedWeapon.ProjectilePrefab, spawnPosition, projectileRotation);
 
-        GameObject projectile =
-            Instantiate(
-                equippedWeapon.ProjectilePrefab,
-                spawnPosition,
-                projectileRotation
-            );
-
-        ShipProjectile shipProjectile =
-            projectile.GetComponent<ShipProjectile>();
+        ShipProjectile shipProjectile = projectile.GetComponent<ShipProjectile>();
 
         if (shipProjectile == null)
         {
-            Debug.LogWarning(
-                $"{projectile.name} does not contain " +
-                "a ShipProjectile component.",
-                projectile
-            );
-
+            Debug.LogWarning($"{projectile.name} does not contain a ShipProjectile component.", projectile);
             Destroy(projectile);
             return false;
         }
 
-        shipProjectile.Initialize(
-            currentTarget,
-            equippedWeapon.Damage,
-            equippedWeapon.ProjectileSpeed
-        );
+        shipProjectile.Initialize(currentTarget, equippedWeapon.Damage, equippedWeapon.ProjectileSpeed);
 
         return true;
     }
@@ -567,37 +447,19 @@ public class ShipWeaponController : MonoBehaviour
             return false;
         }
 
-        Transform selectedFirePoint =
-            GetFirstValidFirePoint();
+        Transform selectedFirePoint = GetFirstValidFirePoint();
+        Vector3 shotOrigin = selectedFirePoint != null ? selectedFirePoint.position : transform.position;
 
-        Vector3 shotOrigin =
-            selectedFirePoint != null
-                ? selectedFirePoint.position
-                : transform.position;
-
-        currentTarget.TakeDamage(
-            equippedWeapon.Damage
-        );
-
-        Debug.DrawLine(
-            shotOrigin,
-            currentTarget.transform.position,
-            Color.red,
-            0.2f
-        );
+        currentTarget.TakeDamage(equippedWeapon.Damage);
+        Debug.DrawLine(shotOrigin, currentTarget.transform.position, Color.red, 0.2f);
 
         return true;
     }
 
     private Transform GetFirstValidFirePoint()
     {
-        if (firePoints == null ||
-            firePoints.Length == 0)
+        if (firePoints == null || firePoints.Length == 0)
         {
-            /*
-             * Fall back to the ship root so the weapon still works
-             * while a fire point is being configured.
-             */
             return transform;
         }
 
@@ -614,23 +476,14 @@ public class ShipWeaponController : MonoBehaviour
 
     private Transform GetCurrentAlternatingFirePoint()
     {
-        if (firePoints == null ||
-            firePoints.Length == 0)
+        if (firePoints == null || firePoints.Length == 0)
         {
             return transform;
         }
 
-        /*
-         * Search from the current index until a valid fire point
-         * is found, in case an array element is empty.
-         */
-        for (int attempt = 0;
-             attempt < firePoints.Length;
-             attempt++)
+        for (int attempt = 0; attempt < firePoints.Length; attempt++)
         {
-            int index =
-                (nextFirePointIndex + attempt) %
-                firePoints.Length;
+            int index = (nextFirePointIndex + attempt) % firePoints.Length;
 
             if (firePoints[index] == null)
             {
@@ -646,15 +499,12 @@ public class ShipWeaponController : MonoBehaviour
 
     private void AdvanceFirePoint()
     {
-        if (firePoints == null ||
-            firePoints.Length == 0)
+        if (firePoints == null || firePoints.Length == 0)
         {
             return;
         }
 
-        nextFirePointIndex =
-            (nextFirePointIndex + 1) %
-            firePoints.Length;
+        nextFirePointIndex = (nextFirePointIndex + 1) % firePoints.Length;
     }
 
     private void OnDrawGizmosSelected()
@@ -664,9 +514,6 @@ public class ShipWeaponController : MonoBehaviour
             return;
         }
 
-        Gizmos.DrawWireSphere(
-            transform.position,
-            equippedWeapon.AttackRange
-        );
+        Gizmos.DrawWireSphere(transform.position, equippedWeapon.AttackRange);
     }
 }
