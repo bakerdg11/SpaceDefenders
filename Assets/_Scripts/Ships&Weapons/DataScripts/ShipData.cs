@@ -14,8 +14,6 @@ public class ShipData : ScriptableObject
     [Header("Prefab")]
     [SerializeField] private GameObject shipPrefab;
 
-    [SerializeField] private int shipPlacementCost;
-
     [Header("Statistics")]
     [SerializeField, Min(1f)] private float maximumHealth;
     [SerializeField, Min(0f)] private float movementSpeed;
@@ -23,6 +21,8 @@ public class ShipData : ScriptableObject
 
     [Header("Grid Placement")]
     [SerializeField, Min(0f)] private float heightOffset = 0.75f;
+    [SerializeField] private int shipPlacementCost;
+    [SerializeField] private ShipPlacementRule placementRule;
 
     [Header("Weapons")]
     [SerializeField] private ShipWeaponSlot[] weaponSlots;
@@ -32,12 +32,15 @@ public class ShipData : ScriptableObject
     public Sprite Icon => icon;
 
     public GameObject ShipPrefab => shipPrefab;
-    public int ShipPlacementCost => shipPlacementCost;
 
     public float MaximumHealth => maximumHealth;
     public float MovementSpeed => movementSpeed;
     public float RotationSpeed => rotationSpeed;
+
+
     public float HeightOffset => heightOffset;
+    public int ShipPlacementCost => shipPlacementCost;
+    public ShipPlacementRule PlacementRule => placementRule;
 
     public ShipWeaponSlot[] WeaponSlots => weaponSlots;
 }

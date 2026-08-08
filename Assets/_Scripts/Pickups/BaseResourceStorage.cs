@@ -3,17 +3,11 @@ using UnityEngine;
 
 public class BaseResourceStorage : MonoBehaviour
 {
-    [SerializeField, Min(0)] private int storedResources;
+    [SerializeField] private int storedResources = 100;
 
     public int StoredResources => storedResources;
 
     public event Action<int> ResourcesChanged;
-
-    private void Start()
-    {
-        ResourcesChanged?.Invoke(storedResources);
-        storedResources = 100;
-    }
 
     public void DepositResources(int amount)
     {
@@ -23,13 +17,9 @@ public class BaseResourceStorage : MonoBehaviour
         }
 
         storedResources += amount;
-
         ResourcesChanged?.Invoke(storedResources);
 
-        Debug.Log(
-            $"Deposited {amount} resources. " +
-            $"Base now has {storedResources}."
-        );
+        Debug.Log($"Deposited {amount} resources. Base now has {storedResources}.");
     }
 
     public bool CanAfford(int cost)
@@ -53,13 +43,8 @@ public class BaseResourceStorage : MonoBehaviour
         storedResources -= cost;
         ResourcesChanged?.Invoke(storedResources);
 
-        Debug.Log(
-            $"Spent {cost} resources. " +
-            $"Base now has {storedResources}."
-        );
+        Debug.Log($"Spent {cost} resources. Base now has {storedResources}.");
 
         return true;
     }
-
-
 }

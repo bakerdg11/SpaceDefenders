@@ -28,9 +28,17 @@ public class ShipWeaponController : MonoBehaviour
 
     private bool isSequentialFiring;
 
+    private float currentEnergy;
+    private float beamStoppedTime;
+    private bool isBeamFiring;
+    private LaserBeam activeBeam;
+    private EnemyHealth beamTarget;
+
     public WeaponData EquippedWeapon => equippedWeapon;
     public EnemyHealth CurrentTarget => currentTarget;
     public int CurrentAmmunition => currentAmmunition;
+    public float CurrentEnergy => currentEnergy;
+    public bool IsBeamFiring => isBeamFiring;
 
     private void Awake()
     {
@@ -45,13 +53,26 @@ public class ShipWeaponController : MonoBehaviour
 
     private void Update()
     {
-        if (!CanCurrentlyAttack())
+        if (equippedWeapon == null)
         {
+            return;
+        }
+
+        if (collectorShip != null && !collectorShip.CanAttack)
+        {
+            StopBeam();
             currentTarget = null;
+            RegenerateEnergy();
             return;
         }
 
         UpdateTarget();
+
+        if (equippedWeapon.BeamPrefab != null)
+        {
+            UpdateBeamWeapon();
+            return;
+        }
 
         if (currentTarget == null)
         {
@@ -96,30 +117,10 @@ public class ShipWeaponController : MonoBehaviour
 
         equippedWeapon = startingWeapon;
         currentAmmunition = Mathf.Max(0, equippedWeapon.Ammunition);
+        currentEnergy = equippedWeapon.MaximumEnergy;
         nextFirePointIndex = 0;
 
-        Debug.Log($"{name} equipped {equippedWeapon.WeaponName} with {currentAmmunition} ammunition.");
-    }
-
-    private bool CanCurrentlyAttack()
-    {
-        if (equippedWeapon == null)
-        {
-            return false;
-        }
-
-        // Resource collection takes priority over attacking.
-        if (collectorShip != null && !collectorShip.CanAttack)
-        {
-            return false;
-        }
-
-        if (currentAmmunition <= 0)
-        {
-            return false;
-        }
-
-        return true;
+        Debug.Log($"{name} equipped {equippedWeapon.WeaponName}.");
     }
 
     private void UpdateTarget()
@@ -185,6 +186,11 @@ public class ShipWeaponController : MonoBehaviour
 
     private void AimAtTarget()
     {
+        if (currentTarget == null)
+        {
+            return;
+        }
+
         Vector3 directionToTarget = currentTarget.transform.position - transform.position;
         directionToTarget.y = 0f;
 
@@ -195,6 +201,128 @@ public class ShipWeaponController : MonoBehaviour
 
         Quaternion targetRotation = Quaternion.LookRotation(directionToTarget.normalized, Vector3.up);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, shipController.RotationSpeed * Time.deltaTime);
+    }
+
+    private void UpdateBeamWeapon()
+    {
+        if (currentTarget == null)
+        {
+            StopBeam();
+            RegenerateEnergy();
+            return;
+        }
+
+        AimAtTarget();
+
+        if (isBeamFiring)
+        {
+            ContinueBeam();
+            return;
+        }
+
+        RegenerateEnergy();
+
+        if (currentEnergy < equippedWeapon.MaximumEnergy)
+        {
+            return;
+        }
+
+        if (!IsAimedAtTarget())
+        {
+            return;
+        }
+
+        StartBeam();
+    }
+
+    private void StartBeam()
+    {
+        Transform selectedFirePoint = GetFirstValidFirePoint();
+
+        if (selectedFirePoint == null || currentTarget == null)
+        {
+            return;
+        }
+
+        GameObject beamObject = Instantiate(equippedWeapon.BeamPrefab, selectedFirePoint.position, Quaternion.identity);
+        activeBeam = beamObject.GetComponent<LaserBeam>();
+
+        if (activeBeam == null)
+        {
+            Debug.LogWarning($"{beamObject.name} does not contain LaserBeam.", beamObject);
+            Destroy(beamObject);
+            return;
+        }
+
+        beamTarget = currentTarget;
+        activeBeam.Initialize(selectedFirePoint, beamTarget.transform);
+        isBeamFiring = true;
+    }
+
+    private void ContinueBeam()
+    {
+        if (beamTarget == null || activeBeam == null)
+        {
+            StopBeam();
+            return;
+        }
+
+        if (currentTarget != beamTarget)
+        {
+            StopBeam();
+            return;
+        }
+
+        if (!IsTargetValid(beamTarget))
+        {
+            StopBeam();
+            return;
+        }
+
+        currentEnergy -= equippedWeapon.EnergyDepletionRate * Time.deltaTime;
+        currentEnergy = Mathf.Max(0f, currentEnergy);
+
+        beamTarget.TakeDamage(equippedWeapon.Damage * Time.deltaTime);
+
+        if (currentEnergy <= 0f)
+        {
+            StopBeam();
+        }
+    }
+
+    private void StopBeam()
+    {
+        if (!isBeamFiring && activeBeam == null)
+        {
+            return;
+        }
+
+        isBeamFiring = false;
+        beamStoppedTime = Time.time;
+
+        if (activeBeam != null)
+        {
+            activeBeam.StopBeam();
+            activeBeam = null;
+        }
+
+        beamTarget = null;
+    }
+
+    private void RegenerateEnergy()
+    {
+        if (isBeamFiring || currentEnergy >= equippedWeapon.MaximumEnergy)
+        {
+            return;
+        }
+
+        if (Time.time < beamStoppedTime + equippedWeapon.EnergyRegenerationDelay)
+        {
+            return;
+        }
+
+        currentEnergy += equippedWeapon.EnergyRegenerationRate * Time.deltaTime;
+        currentEnergy = Mathf.Min(currentEnergy, equippedWeapon.MaximumEnergy);
     }
 
     private void TryFire()
@@ -221,9 +349,7 @@ public class ShipWeaponController : MonoBehaviour
             return;
         }
 
-        // One firing cycle uses one ammunition, even if multiple projectiles are fired.
         currentAmmunition--;
-
         nextFireTime = Time.time + equippedWeapon.SecondsBetweenAttacks;
 
         Debug.Log($"{name} fired {equippedWeapon.WeaponName}. Ammo remaining: {currentAmmunition}");
@@ -231,6 +357,11 @@ public class ShipWeaponController : MonoBehaviour
 
     private bool IsAimedAtTarget()
     {
+        if (currentTarget == null)
+        {
+            return false;
+        }
+
         Vector3 directionToTarget = currentTarget.transform.position - transform.position;
         directionToTarget.y = 0f;
 
@@ -250,11 +381,6 @@ public class ShipWeaponController : MonoBehaviour
             return false;
         }
 
-        if (equippedWeapon.BeamPrefab != null)
-        {
-            return FireBeam();
-        }
-
         if (equippedWeapon.ProjectilePrefab != null)
         {
             switch (equippedWeapon.FirePattern)
@@ -272,44 +398,11 @@ public class ShipWeaponController : MonoBehaviour
                     return StartSequentialProjectiles();
 
                 default:
-                    Debug.LogWarning($"{name} has an unsupported fire pattern.", this);
                     return false;
             }
         }
 
         return FireInstantHit();
-    }
-
-    private bool FireBeam()
-    {
-        if (currentTarget == null || equippedWeapon == null || equippedWeapon.BeamPrefab == null)
-        {
-            return false;
-        }
-
-        Transform selectedFirePoint = GetFirstValidFirePoint();
-
-        if (selectedFirePoint == null)
-        {
-            return false;
-        }
-
-        GameObject beamObject = Instantiate(equippedWeapon.BeamPrefab, selectedFirePoint.position, Quaternion.identity);
-        LaserBeam laserBeam = beamObject.GetComponent<LaserBeam>();
-
-        if (laserBeam == null)
-        {
-            Debug.LogWarning($"{beamObject.name} does not contain LaserBeam.", beamObject);
-            Destroy(beamObject);
-            return false;
-        }
-
-        laserBeam.Initialize(selectedFirePoint, currentTarget.transform, equippedWeapon.BeamDuration);
-
-        // Beam damage is instantaneous. The LaserBeam prefab is only the visual effect.
-        currentTarget.TakeDamage(equippedWeapon.Damage);
-
-        return true;
     }
 
     private bool FireSingleProjectile()
@@ -347,7 +440,6 @@ public class ShipWeaponController : MonoBehaviour
     {
         if (firePoints == null || firePoints.Length == 0)
         {
-            Debug.LogWarning($"{name} has no fire points assigned.", this);
             return false;
         }
 
@@ -355,12 +447,7 @@ public class ShipWeaponController : MonoBehaviour
 
         foreach (Transform firePoint in firePoints)
         {
-            if (firePoint == null)
-            {
-                continue;
-            }
-
-            if (SpawnProjectile(firePoint))
+            if (firePoint != null && SpawnProjectile(firePoint))
             {
                 spawnedAtLeastOneProjectile = true;
             }
@@ -378,13 +465,6 @@ public class ShipWeaponController : MonoBehaviour
 
         if (firePoints == null || firePoints.Length < 2)
         {
-            Debug.LogWarning($"{name} needs at least 2 fire points for Sequential firing.", this);
-            return false;
-        }
-
-        if (firePoints[0] == null || firePoints[1] == null)
-        {
-            Debug.LogWarning($"{name} has an empty sequential fire point.", this);
             return false;
         }
 
@@ -410,13 +490,12 @@ public class ShipWeaponController : MonoBehaviour
 
     private bool SpawnProjectile(Transform selectedFirePoint)
     {
-        if (selectedFirePoint == null || currentTarget == null || equippedWeapon == null || equippedWeapon.ProjectilePrefab == null)
+        if (selectedFirePoint == null || currentTarget == null || equippedWeapon.ProjectilePrefab == null)
         {
             return false;
         }
 
-        Vector3 spawnPosition = selectedFirePoint.position;
-        Vector3 direction = currentTarget.transform.position - spawnPosition;
+        Vector3 direction = currentTarget.transform.position - selectedFirePoint.position;
 
         if (direction.sqrMagnitude <= 0.001f)
         {
@@ -424,13 +503,12 @@ public class ShipWeaponController : MonoBehaviour
         }
 
         Quaternion projectileRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-        GameObject projectile = Instantiate(equippedWeapon.ProjectilePrefab, spawnPosition, projectileRotation);
+        GameObject projectile = Instantiate(equippedWeapon.ProjectilePrefab, selectedFirePoint.position, projectileRotation);
 
         ShipProjectile shipProjectile = projectile.GetComponent<ShipProjectile>();
 
         if (shipProjectile == null)
         {
-            Debug.LogWarning($"{projectile.name} does not contain a ShipProjectile component.", projectile);
             Destroy(projectile);
             return false;
         }
@@ -447,12 +525,7 @@ public class ShipWeaponController : MonoBehaviour
             return false;
         }
 
-        Transform selectedFirePoint = GetFirstValidFirePoint();
-        Vector3 shotOrigin = selectedFirePoint != null ? selectedFirePoint.position : transform.position;
-
         currentTarget.TakeDamage(equippedWeapon.Damage);
-        Debug.DrawLine(shotOrigin, currentTarget.transform.position, Color.red, 0.2f);
-
         return true;
     }
 
@@ -507,13 +580,16 @@ public class ShipWeaponController : MonoBehaviour
         nextFirePointIndex = (nextFirePointIndex + 1) % firePoints.Length;
     }
 
+    private void OnDestroy()
+    {
+        StopBeam();
+    }
+
     private void OnDrawGizmosSelected()
     {
-        if (equippedWeapon == null)
+        if (equippedWeapon != null)
         {
-            return;
+            Gizmos.DrawWireSphere(transform.position, equippedWeapon.AttackRange);
         }
-
-        Gizmos.DrawWireSphere(transform.position, equippedWeapon.AttackRange);
     }
 }

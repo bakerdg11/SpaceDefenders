@@ -128,7 +128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91e879ee3a7d05e409cfd179ca22f66a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BaseResourceStorage
-  storedResources: 0
+  storedResources: 50
 --- !u!114 &8392939733973962667
 MonoBehaviour:
   m_ObjectHideFlags: 0

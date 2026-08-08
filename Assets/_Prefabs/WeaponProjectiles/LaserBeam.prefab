@@ -92,31 +92,31 @@ LineRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0
-        value: 1
-        inSlope: 0
-        outSlope: 0
+        time: 0.0019683838
+        value: 0.18803215
+        inSlope: -0.26049176
+        outSlope: -0.26049176
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 0.18647692
+        outWeight: 0.21107098
       - serializedVersion: 3
-        time: 0.47412837
-        value: 1
-        inSlope: -0.047865413
-        outSlope: -0.047865413
+        time: 0.4682822
+        value: 0.09401542
+        inSlope: -0.22099914
+        outSlope: -0.22099914
         tangentMode: 0
         weightedMode: 0
-        inWeight: 0.13652349
-        outWeight: 0.26411173
+        inWeight: 0.17226604
+        outWeight: 0.18182278
       - serializedVersion: 3
         time: 1
-        value: 1
-        inSlope: 0.044305176
-        outSlope: 0.044305176
+        value: 0
+        inSlope: -0.28316587
+        outSlope: -0.28316587
         tangentMode: 0
         weightedMode: 0
-        inWeight: 0.18342264
+        inWeight: 0.16658969
         outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
@@ -173,4 +173,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13acc0df047d1b04682e5542c3144756, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaserBeam
-  beamDuration: 0.1

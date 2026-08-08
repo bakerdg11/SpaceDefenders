@@ -41,9 +41,15 @@ public class HUD : MonoBehaviour
 
     private void UpdateResourcesText(int amount)
     {
+        Debug.Log($"HUD received resource update: {amount}");
+
         if (resourcesHeldText != null)
         {
             resourcesHeldText.text = $"Resources: {amount}";
+        }
+        else
+        {
+            Debug.LogError("HUD Resources Held Text is not assigned.", this);
         }
     }
 }

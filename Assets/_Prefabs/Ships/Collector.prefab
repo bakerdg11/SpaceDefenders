@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 23212936114598752}
   - component: {fileID: -2998482177141046425}
   - component: {fileID: 5896196066476530088}
-  - component: {fileID: 3815917734068659632}
   - component: {fileID: 3328639796184676620}
+  - component: {fileID: -1329106437312329267}
   m_Layer: 0
   m_Name: Collector
   m_TagString: Untagged
@@ -130,20 +130,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShipController
   shipData: {fileID: 11400000, guid: 5200d50459305f642960820dfbb8904c, type: 2}
---- !u!114 &3815917734068659632
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1152354105411914}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5466e3e4b7174e6409fb1f0e24fb9560, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CollectorShip
-  stoppingDistance: 0.25
-  maximumCapacity: 100
 --- !u!114 &3328639796184676620
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,6 +150,20 @@ MonoBehaviour:
   - {fileID: 5834039330255502343}
   - {fileID: 4342293094692039400}
   requiredAimAngle: 8
+--- !u!114 &-1329106437312329267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152354105411914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5466e3e4b7174e6409fb1f0e24fb9560, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CollectorShip
+  stoppingDistance: 0.75
+  maximumCapacity: 100
 --- !u!1 &126095076137056836
 GameObject:
   m_ObjectHideFlags: 0

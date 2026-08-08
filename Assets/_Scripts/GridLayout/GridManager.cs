@@ -160,62 +160,68 @@ public class GridManager : MonoBehaviour
     /// Checks the selected cell and its four direct neighbours.
     /// Diagonal cells are not checked.
     /// </summary>
-    public bool CanPlaceShipAt(int x, int z)
+    public bool CanPlaceShipAt(int x, int z, ShipData shipData)
     {
         GridCell targetCell = GetCell(x, z);
 
-        if (targetCell == null)
+        if (targetCell == null || shipData == null)
         {
             return false;
         }
 
-        if (targetCell.CellType != GridCellType.Buildable)
+        if (targetCell.CellType != GridCellType.Buildable || targetCell.IsOccupied)
         {
             return false;
         }
 
-        if (targetCell.IsOccupied)
+        if (shipData.PlacementRule == ShipPlacementRule.BaseSideOnly)
         {
-            return false;
+            return CanPlaceBaseSupportShipAt(targetCell);
         }
 
-        foreach (Vector2Int direction in AdjacentDirections)
+        return CanPlaceStandardShipAt(targetCell);
+    }
+
+    private bool CanPlaceStandardShipAt(GridCell targetCell)
+    {
+        Vector2Int position = targetCell.GridPosition;
+
+        Vector2Int[] adjacentDirections =
         {
-            int adjacentX = x + direction.x;
-            int adjacentZ = z + direction.y;
+        new Vector2Int(1, 0),
+        new Vector2Int(-1, 0),
+        new Vector2Int(0, 1),
+        new Vector2Int(0, -1)
+    };
 
-            GridCell adjacentCell = GetCell(
-                adjacentX,
-                adjacentZ
-            );
+        foreach (Vector2Int direction in adjacentDirections)
+        {
+            GridCell adjacentCell = GetCell(position.x + direction.x, position.y + direction.y);
 
-            // A null cell means that direction is outside the grid.
-            if (adjacentCell == null)
+            if (adjacentCell != null && adjacentCell.IsOccupied)
             {
-                continue;
+                return false;
             }
-
-            if (!adjacentCell.IsOccupied)
-            {
-                continue;
-            }
-
-            // Optionally allow placement beside the player's base.
-            if (!baseShipBlocksAdjacentCells &&
-                adjacentCell.CellType == GridCellType.BaseShip)
-            {
-                continue;
-            }
-
-            return false;
         }
 
         return true;
     }
 
+    private bool CanPlaceBaseSupportShipAt(GridCell targetCell)
+    {
+        int baseX = width / 2;
+        int baseZ = 0;
+
+        Vector2Int targetPosition = targetCell.GridPosition;
+
+        bool isLeftOfBase = targetPosition.x == baseX - 1 && targetPosition.y == baseZ;
+        bool isRightOfBase = targetPosition.x == baseX + 1 && targetPosition.y == baseZ;
+
+        return isLeftOfBase || isRightOfBase;
+    }
+
     /// <summary>
-    /// Attempts to place a defensive ship after checking the
-    /// target cell and all four adjacent cells.
+    /// Attempts to place a ship using grid coordinates.
     /// </summary>
     public bool TryPlaceShipAt(int x, int z, ShipData shipData)
     {
@@ -225,31 +231,21 @@ public class GridManager : MonoBehaviour
             return false;
         }
 
-        if (!CanPlaceShipAt(x, z))
+        if (!CanPlaceShipAt(x, z, shipData))
         {
-            Debug.Log(
-                $"Cannot place ship at ({x}, {z}). " +
-                "The cell is unavailable or has an occupied neighbour."
-            );
-
+            Debug.Log($"Cannot place {shipData.ShipName} at ({x}, {z}). The cell does not meet the placement rules.");
             return false;
         }
 
         GridCell targetCell = GetCell(x, z);
 
-        return targetCell.TryPlaceShip(
-            shipData,
-            defensiveShipsParent
-        );
+        return targetCell.TryPlaceShip(shipData, defensiveShipsParent);
     }
 
     /// <summary>
-    /// Convenience overload that accepts a GridCell directly.
-    /// Useful when the cell was found using a raycast.
+    /// Convenience overload for placing a ship using a GridCell.
     /// </summary>
-    public bool TryPlaceShipAt(
-        GridCell targetCell,
-        ShipData shipData)
+    public bool TryPlaceShipAt(GridCell targetCell, ShipData shipData)
     {
         if (targetCell == null)
         {
@@ -258,11 +254,7 @@ public class GridManager : MonoBehaviour
 
         Vector2Int position = targetCell.GridPosition;
 
-        return TryPlaceShipAt(
-            position.x,
-            position.y,
-            shipData
-        );
+        return TryPlaceShipAt(position.x, position.y, shipData);
     }
 
     public bool CanMoveShipTo(

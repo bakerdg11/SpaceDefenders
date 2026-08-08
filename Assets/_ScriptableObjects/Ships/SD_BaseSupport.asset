@@ -16,11 +16,12 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   shipPrefab: {fileID: 8388683588741211696, guid: 3139cd92f18b6b04abb52da0f46ccd16, type: 3}
-  shipPlacementCost: 15
   maximumHealth: 100
   movementSpeed: 5
   rotationSpeed: 200
   heightOffset: 0.75
+  shipPlacementCost: 15
+  placementRule: 1
   weaponSlots:
   - slotName: 
     allowedWeaponTypes: 02000000
