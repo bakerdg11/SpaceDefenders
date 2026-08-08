@@ -27,8 +27,8 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
-        //ShowMainMenu();
-        StartGame();
+        ShowMainMenu();
+        //StartGame();
     }
 
     private void OnDestroy()

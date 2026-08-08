@@ -53,6 +53,11 @@ public class ShipWeaponController : MonoBehaviour
 
     private void Update()
     {
+        if (shipController == null || !shipController.IsOperational)
+        {
+            return;
+        }
+
         if (equippedWeapon == null)
         {
             return;

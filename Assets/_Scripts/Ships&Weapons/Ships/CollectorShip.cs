@@ -44,10 +44,6 @@ public class CollectorShip : MonoBehaviour
 
     private void Start()
     {
-        /*
-         * Fallback initialization in case the grid did not call
-         * InitializeCollector after spawning the ship.
-         */
         if (!hasBeenInitialized)
         {
             InitializeCollector(transform.position);
@@ -58,8 +54,7 @@ public class CollectorShip : MonoBehaviour
 
     private void Update()
     {
-        if (shipController == null ||
-            shipController.ShipData == null)
+        if (shipController == null || !shipController.IsOperational)
         {
             return;
         }

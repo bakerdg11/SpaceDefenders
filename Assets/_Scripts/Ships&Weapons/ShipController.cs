@@ -1,13 +1,18 @@
 using UnityEngine;
+using System.Collections;
 
 public class ShipController : MonoBehaviour
 {
     [SerializeField] private ShipData shipData;
-
     private float currentHealth;
+    [SerializeField] private float activationDelay = 3f;
+    private bool isOperational;
 
     public ShipData ShipData => shipData;
     public float CurrentHealth => currentHealth;
+    public float ActivationDelay => activationDelay;
+    public bool IsOperational => isOperational;
+
 
     public float MaximumHealth =>
         shipData != null ? shipData.MaximumHealth : 0f;
@@ -30,21 +35,21 @@ public class ShipController : MonoBehaviour
     {
         shipData = newShipData;
         InitializeFromData();
+        StartCoroutine(ActivationCountdown());
     }
 
-    public void TakeDamage(float damage)
+    private IEnumerator ActivationCountdown()
     {
-        if (damage <= 0f || currentHealth <= 0f)
-        {
-            return;
-        }
+        isOperational = false;
 
-        currentHealth = Mathf.Max(0f, currentHealth - damage);
+        yield return new WaitForSeconds(activationDelay);
 
-        if (currentHealth <= 0f)
-        {
-            Die();
-        }
+        isOperational = true;
+    }
+
+    public void ActivateImmediately()
+    {
+        isOperational = true;
     }
 
     private void InitializeFromData()
@@ -60,6 +65,21 @@ public class ShipController : MonoBehaviour
         }
 
         currentHealth = shipData.MaximumHealth;
+    }
+
+    public void TakeDamage(float damage)
+    {
+        if (damage <= 0f || currentHealth <= 0f)
+        {
+            return;
+        }
+
+        currentHealth = Mathf.Max(0f, currentHealth - damage);
+
+        if (currentHealth <= 0f)
+        {
+            Die();
+        }
     }
 
     private void Die()

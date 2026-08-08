@@ -6,12 +6,11 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private GameObject enemyPrefab;
 
     [Header("Path")]
-    [SerializeField] private Transform spawnPoint;
+    [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private Transform destinationPoint;
 
     [Header("Spawn")]
-    [SerializeField, Min(0.1f)]
-    private float spawnInterval = 3f;
+    [SerializeField] private float spawnInterval = 3f;
 
     private float spawnTimer;
 
@@ -33,41 +32,29 @@ public class EnemySpawner : MonoBehaviour
 
     private void SpawnEnemy()
     {
-        if (enemyPrefab == null ||
-            spawnPoint == null ||
-            destinationPoint == null)
+        if (enemyPrefab == null || spawnPoints == null || spawnPoints.Length == 0 || destinationPoint == null)
         {
-            Debug.LogWarning(
-                "EnemySpawner is missing the Enemy Prefab, " +
-                "Spawn Point, or Destination Point.",
-                this
-            );
-
+            Debug.LogWarning("EnemySpawner is missing the Enemy Prefab, Spawn Points, or Destination Point.", this);
             return;
         }
 
-        GameObject enemy = Instantiate(
-            enemyPrefab,
-            spawnPoint.position,
-            spawnPoint.rotation
-        );
+        Transform selectedSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
 
-        EnemyPatrol patrol =
-            enemy.GetComponent<EnemyPatrol>();
+        if (selectedSpawnPoint == null)
+        {
+            return;
+        }
+
+        GameObject enemy = Instantiate(enemyPrefab, selectedSpawnPoint.position, selectedSpawnPoint.rotation);
+
+        EnemyPatrol patrol = enemy.GetComponent<EnemyPatrol>();
 
         if (patrol == null)
         {
-            Debug.LogWarning(
-                $"{enemy.name} does not contain EnemyPatrol.",
-                enemy
-            );
-
+            Debug.LogWarning($"{enemy.name} does not contain EnemyPatrol.", enemy);
             return;
         }
 
-        patrol.Initialize(
-            spawnPoint,
-            destinationPoint
-        );
+        patrol.Initialize(selectedSpawnPoint, destinationPoint);
     }
 }

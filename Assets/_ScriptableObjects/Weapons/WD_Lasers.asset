@@ -19,7 +19,7 @@ MonoBehaviour:
   damage: 25
   ammunition: 0
   attackFireRate: 0
-  attackRange: 1
+  attackRange: 30
   projectileSpeed: 0
   sequentialFireDelay: 0
   maximumEnergy: 100

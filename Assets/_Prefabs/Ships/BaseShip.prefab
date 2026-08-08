@@ -142,6 +142,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShipController
   shipData: {fileID: 11400000, guid: c99004457ba2f6d4e8ce4f3bee7b276d, type: 2}
+  activationDelay: 0
 --- !u!114 &4809335776150116547
 MonoBehaviour:
   m_ObjectHideFlags: 0
