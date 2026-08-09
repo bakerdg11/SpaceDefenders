@@ -17,14 +17,16 @@ MonoBehaviour:
   icon: {fileID: 0}
   weaponType: 4
   damage: 20
-  ammunition: 500
+  ammunition: 50
   attackFireRate: 2
   attackRange: 30
   projectileSpeed: 50
+  sequentialFireDelay: 0.25
+  maximumEnergy: 100
   energyDepletionRate: 0
+  energyRegenerationDelay: 0
   energyRegenerationRate: 0
   projectilePrefab: {fileID: 1321556595456524417, guid: 727f098d832365a48b8b524bd2d15acd, type: 3}
   weaponModelPrefab: {fileID: 0}
   beamPrefab: {fileID: 0}
-  beamDuration: 0.1
   firePattern: 1

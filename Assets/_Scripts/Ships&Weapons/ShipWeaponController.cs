@@ -1,38 +1,41 @@
 using System.Collections;
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(ShipController))]
 public class ShipWeaponController : MonoBehaviour
 {
-    [Header("Targeting")]
-    [SerializeField] private LayerMask enemyLayer;
-    [SerializeField] private float targetScanInterval = 0.25f;
-
-    [Header("Weapon Positions")]
-    [SerializeField] private Transform[] firePoints;
-
-    [Header("Aiming")]
-    [SerializeField] private float requiredAimAngle = 8f;
-
+    [Header("References")]
     private ShipController shipController;
     private CollectorShip collectorShip;
-
     private WeaponData equippedWeapon;
     private EnemyHealth currentTarget;
 
-    private int currentAmmunition;
-    private int nextFirePointIndex;
+    [Header("Targeting")]
+    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private float targetScanInterval = 0.25f;
+    [SerializeField] private float requiredAimAngle = 8f;
 
+
+    [Header("Weapon Firing")]
+    [SerializeField] private Transform[] firePoints;
+    private int nextFirePointIndex;
     private float nextScanTime;
     private float nextFireTime;
-
     private bool isSequentialFiring;
 
+    private int currentAmmunition;
+    public event Action<int, int> AmmunitionChanged;
+
+    [Header("Laser Beam")]
     private float currentEnergy;
     private float beamStoppedTime;
     private bool isBeamFiring;
+    private bool waitingForFullRecharge;
     private LaserBeam activeBeam;
     private EnemyHealth beamTarget;
+    public event Action<float, float> EnergyChanged;
+
 
     public WeaponData EquippedWeapon => equippedWeapon;
     public EnemyHealth CurrentTarget => currentTarget;
@@ -65,7 +68,7 @@ public class ShipWeaponController : MonoBehaviour
 
         if (collectorShip != null && !collectorShip.CanAttack)
         {
-            StopBeam();
+            StopBeam(false);
             currentTarget = null;
             RegenerateEnergy();
             return;
@@ -122,7 +125,9 @@ public class ShipWeaponController : MonoBehaviour
 
         equippedWeapon = startingWeapon;
         currentAmmunition = Mathf.Max(0, equippedWeapon.Ammunition);
+        AmmunitionChanged?.Invoke(currentAmmunition, equippedWeapon.Ammunition);
         currentEnergy = equippedWeapon.MaximumEnergy;
+        EnergyChanged?.Invoke(currentEnergy, equippedWeapon.MaximumEnergy);
         nextFirePointIndex = 0;
 
         Debug.Log($"{name} equipped {equippedWeapon.WeaponName}.");
@@ -212,7 +217,7 @@ public class ShipWeaponController : MonoBehaviour
     {
         if (currentTarget == null)
         {
-            StopBeam();
+            StopBeam(false);
             RegenerateEnergy();
             return;
         }
@@ -225,10 +230,22 @@ public class ShipWeaponController : MonoBehaviour
             return;
         }
 
-        RegenerateEnergy();
-
-        if (currentEnergy < equippedWeapon.MaximumEnergy)
+        if (waitingForFullRecharge)
         {
+            RegenerateEnergy();
+
+            if (currentEnergy < equippedWeapon.MaximumEnergy)
+            {
+                return;
+            }
+
+            waitingForFullRecharge = false;
+        }
+
+        if (currentEnergy <= 0f)
+        {
+            waitingForFullRecharge = true;
+            RegenerateEnergy();
             return;
         }
 
@@ -268,34 +285,36 @@ public class ShipWeaponController : MonoBehaviour
     {
         if (beamTarget == null || activeBeam == null)
         {
-            StopBeam();
+            StopBeam(false);
             return;
         }
 
         if (currentTarget != beamTarget)
         {
-            StopBeam();
+            StopBeam(false);
             return;
         }
 
         if (!IsTargetValid(beamTarget))
         {
-            StopBeam();
+            StopBeam(false);
             return;
         }
 
         currentEnergy -= equippedWeapon.EnergyDepletionRate * Time.deltaTime;
         currentEnergy = Mathf.Max(0f, currentEnergy);
 
+        EnergyChanged?.Invoke(currentEnergy, equippedWeapon.MaximumEnergy);
+
         beamTarget.TakeDamage(equippedWeapon.Damage * Time.deltaTime);
 
         if (currentEnergy <= 0f)
         {
-            StopBeam();
+            StopBeam(true);
         }
     }
 
-    private void StopBeam()
+    private void StopBeam(bool depleted)
     {
         if (!isBeamFiring && activeBeam == null)
         {
@@ -303,7 +322,12 @@ public class ShipWeaponController : MonoBehaviour
         }
 
         isBeamFiring = false;
-        beamStoppedTime = Time.time;
+
+        if (depleted)
+        {
+            waitingForFullRecharge = true;
+            beamStoppedTime = Time.time;
+        }
 
         if (activeBeam != null)
         {
@@ -321,13 +345,15 @@ public class ShipWeaponController : MonoBehaviour
             return;
         }
 
-        if (Time.time < beamStoppedTime + equippedWeapon.EnergyRegenerationDelay)
+        if (waitingForFullRecharge && Time.time < beamStoppedTime + equippedWeapon.EnergyRegenerationDelay)
         {
             return;
         }
 
         currentEnergy += equippedWeapon.EnergyRegenerationRate * Time.deltaTime;
         currentEnergy = Mathf.Min(currentEnergy, equippedWeapon.MaximumEnergy);
+
+        EnergyChanged?.Invoke(currentEnergy, equippedWeapon.MaximumEnergy);
     }
 
     private void TryFire()
@@ -355,6 +381,7 @@ public class ShipWeaponController : MonoBehaviour
         }
 
         currentAmmunition--;
+        AmmunitionChanged?.Invoke(currentAmmunition, equippedWeapon.Ammunition);
         nextFireTime = Time.time + equippedWeapon.SecondsBetweenAttacks;
 
         Debug.Log($"{name} fired {equippedWeapon.WeaponName}. Ammo remaining: {currentAmmunition}");
@@ -587,7 +614,7 @@ public class ShipWeaponController : MonoBehaviour
 
     private void OnDestroy()
     {
-        StopBeam();
+        StopBeam(false);
     }
 
     private void OnDrawGizmosSelected()
