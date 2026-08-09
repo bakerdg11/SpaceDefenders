@@ -13,19 +13,17 @@ public class HUD : MonoBehaviour
 
         if (baseResourceStorage == null)
         {
-            baseResourceStorage =
-                FindAnyObjectByType<BaseResourceStorage>();
+            baseResourceStorage = FindAnyObjectByType<BaseResourceStorage>();
         }
 
         if (baseResourceStorage == null)
         {
-            Debug.LogError(
-                "HUD could not find BaseResourceStorage.",
-                this
-            );
+            Debug.LogError("HUD could not find BaseResourceStorage.", this);
 
             yield break;
         }
+
+        Debug.Log($"HUD connected to: {baseResourceStorage.gameObject.name}", baseResourceStorage);
 
         baseResourceStorage.ResourcesChanged += UpdateResourcesText;
         UpdateResourcesText(baseResourceStorage.StoredResources);

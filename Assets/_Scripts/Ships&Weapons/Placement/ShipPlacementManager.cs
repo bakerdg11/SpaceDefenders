@@ -70,7 +70,7 @@ public class ShipPlacementManager : MonoBehaviour
             shipSelectionPanel.SetActive(false);
         }
 
-        Debug.Log($"Selected {selectedShip.ShipName}. " + "Select a grid tile to place it.");
+        // Debug.Log($"Selected {selectedShip.ShipName}. " + "Select a grid tile to place it.");
     }
 
 
@@ -203,10 +203,7 @@ public class ShipPlacementManager : MonoBehaviour
             return;
         }
 
-        Debug.Log(
-            $"Placed {selectedShip.ShipName} for " +
-            $"{placementCost} resources."
-        );
+        // Debug.Log($"Placed {selectedShip.ShipName} for " + $"{placementCost} resources.");
 
         selectedShip = null;
     }

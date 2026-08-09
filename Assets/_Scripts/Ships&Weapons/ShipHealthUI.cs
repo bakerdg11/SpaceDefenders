@@ -77,13 +77,13 @@ public class ShipHealthUI : MonoBehaviour
         if (!energyWarningActive && percentage <= visibilityThreshold)
         {
             energyWarningActive = true;
-            Debug.Log("Energy bar turned ON.");
+            // Debug.Log("Energy bar turned ON.");
         }
 
         if (energyWarningActive && percentage >= 1f)
         {
             energyWarningActive = false;
-            Debug.Log("Energy bar turned OFF.");
+            // Debug.Log("Energy bar turned OFF.");
         }
 
         ammoEnergySlider.gameObject.SetActive(energyWarningActive);

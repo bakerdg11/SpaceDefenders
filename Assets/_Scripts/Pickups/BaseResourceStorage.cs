@@ -18,8 +18,6 @@ public class BaseResourceStorage : MonoBehaviour
 
         storedResources += amount;
         ResourcesChanged?.Invoke(storedResources);
-
-        Debug.Log($"Deposited {amount} resources. Base now has {storedResources}.");
     }
 
     public bool CanAfford(int cost)
@@ -31,7 +29,6 @@ public class BaseResourceStorage : MonoBehaviour
     {
         if (cost < 0)
         {
-            Debug.LogWarning("Resource cost cannot be negative.");
             return false;
         }
 
@@ -42,8 +39,6 @@ public class BaseResourceStorage : MonoBehaviour
 
         storedResources -= cost;
         ResourcesChanged?.Invoke(storedResources);
-
-        Debug.Log($"Spent {cost} resources. Base now has {storedResources}.");
 
         return true;
     }

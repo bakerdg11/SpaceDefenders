@@ -130,10 +130,7 @@ public class GridManager : MonoBehaviour
 
         if (wasPlaced)
         {
-            Debug.Log(
-                $"Base ship placed at grid position " +
-                $"{baseCell.GridPosition}."
-            );
+            // Debug.Log($"Base ship placed at grid position " + $"{baseCell.GridPosition}.");
         }
     }
 

@@ -130,7 +130,7 @@ public class ShipWeaponController : MonoBehaviour
         EnergyChanged?.Invoke(currentEnergy, equippedWeapon.MaximumEnergy);
         nextFirePointIndex = 0;
 
-        Debug.Log($"{name} equipped {equippedWeapon.WeaponName}.");
+        // Debug.Log($"{name} equipped {equippedWeapon.WeaponName}.");
     }
 
     private void UpdateTarget()
@@ -383,8 +383,6 @@ public class ShipWeaponController : MonoBehaviour
         currentAmmunition--;
         AmmunitionChanged?.Invoke(currentAmmunition, equippedWeapon.Ammunition);
         nextFireTime = Time.time + equippedWeapon.SecondsBetweenAttacks;
-
-        Debug.Log($"{name} fired {equippedWeapon.WeaponName}. Ammo remaining: {currentAmmunition}");
     }
 
     private bool IsAimedAtTarget()

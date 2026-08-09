@@ -22,7 +22,7 @@ MonoBehaviour:
   attackRange: 50
   projectileSpeed: 0
   sequentialFireDelay: 0
-  maximumEnergy: 20
+  maximumEnergy: 500
   energyDepletionRate: 10
   energyRegenerationDelay: 5
   energyRegenerationRate: 20

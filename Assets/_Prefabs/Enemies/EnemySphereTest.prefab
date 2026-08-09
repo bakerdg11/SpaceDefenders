@@ -126,7 +126,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e8428e90cf5957499b9c16b7fbd8f24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPatrol
-  movementSpeed: 10
+  movementSpeed: 5
   stoppingDistance: 0.1
   rotationSpeed: 360
 --- !u!114 &1776945227941053228
