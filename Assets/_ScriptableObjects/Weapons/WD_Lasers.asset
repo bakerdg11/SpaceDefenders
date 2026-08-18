@@ -16,15 +16,15 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   weaponType: 1
-  damage: 25
+  damage: 100
   ammunition: 0
   attackFireRate: 0
-  attackRange: 50
+  attackRange: 30
   projectileSpeed: 0
   sequentialFireDelay: 0
-  maximumEnergy: 500
-  energyDepletionRate: 10
-  energyRegenerationDelay: 5
+  maximumEnergy: 10
+  energyDepletionRate: 5
+  energyRegenerationDelay: 10
   energyRegenerationRate: 20
   projectilePrefab: {fileID: 0}
   weaponModelPrefab: {fileID: 0}

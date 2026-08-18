@@ -20,9 +20,10 @@ public class ShipData : ScriptableObject
     [SerializeField, Min(0f)] private float rotationSpeed;
 
     [Header("Grid Placement")]
-    [SerializeField, Min(0f)] private float heightOffset = 0.75f;
+    [SerializeField] private int maximumPlaced;
     [SerializeField] private int shipPlacementCost;
     [SerializeField] private ShipPlacementRule placementRule;
+    [SerializeField, Min(0f)] private float heightOffset = 0.75f;
 
     [Header("Weapons")]
     [SerializeField] private ShipWeaponSlot[] weaponSlots;
@@ -38,9 +39,10 @@ public class ShipData : ScriptableObject
     public float RotationSpeed => rotationSpeed;
 
 
-    public float HeightOffset => heightOffset;
+    public int MaximumPlaced => maximumPlaced;
     public int ShipPlacementCost => shipPlacementCost;
     public ShipPlacementRule PlacementRule => placementRule;
+    public float HeightOffset => heightOffset;
 
     public ShipWeaponSlot[] WeaponSlots => weaponSlots;
 }

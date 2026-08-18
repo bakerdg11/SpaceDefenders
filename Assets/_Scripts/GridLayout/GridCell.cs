@@ -126,7 +126,7 @@ public class GridCell : MonoBehaviour
         return releasedShip;
     }
 
-    public bool AssignExistingShip(GameObject ship, float heightOffset)
+    public bool AssignExistingShip(GameObject ship, float heightOffset, bool moveImmediately = true)
     {
         if (ship == null)
         {
@@ -139,7 +139,11 @@ public class GridCell : MonoBehaviour
         }
 
         placedShip = ship;
-        placedShip.transform.position = transform.position + Vector3.up * heightOffset;
+
+        if (moveImmediately)
+        {
+            placedShip.transform.position = transform.position + Vector3.up * heightOffset;
+        }
 
         return true;
     }

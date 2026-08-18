@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class ShipPlacementManager : MonoBehaviour
 {
@@ -15,13 +16,14 @@ public class ShipPlacementManager : MonoBehaviour
 
     private ShipData selectedShip;
     [SerializeField] private BaseResourceStorage baseResourceStorage;
+    private readonly Dictionary<ShipData, int> placedShipCounts = new();
 
     public ShipData SelectedShip => selectedShip;
     public bool IsPlacingShip => selectedShip != null;
 
     private void Awake()
     {
-        if (placementCamera != null)
+        if (placementCamera == null)
         {
             placementCamera = Camera.main;
         }
@@ -140,6 +142,29 @@ public class ShipPlacementManager : MonoBehaviour
         }
     }
 
+
+    public int GetPlacedCount(ShipData shipData)
+    {
+        if (shipData == null)
+        {
+            return 0;
+        }
+
+        return placedShipCounts.TryGetValue(shipData, out int count) ? count : 0;
+    }
+
+    public bool CanPlaceMoreOf(ShipData shipData)
+    {
+        if (shipData == null)
+        {
+            return false;
+        }
+
+        return GetPlacedCount(shipData) < shipData.MaximumPlaced;
+    }
+
+
+
     private void TryPlaceSelectedShip(GridCell selectedCell)
     {
         if (selectedShip == null || selectedCell == null)
@@ -159,6 +184,14 @@ public class ShipPlacementManager : MonoBehaviour
             return;
         }
 
+
+        if (!CanPlaceMoreOf(selectedShip))
+        {
+            Debug.Log($"{selectedShip.ShipName} has reached its placement limit of {selectedShip.MaximumPlaced}.");
+            return;
+        }
+
+
         int placementCost = selectedShip.ShipPlacementCost;
 
         if (!baseResourceStorage.CanAfford(placementCost))
@@ -172,38 +205,26 @@ public class ShipPlacementManager : MonoBehaviour
             return;
         }
 
-        bool placementSucceeded =
-            gridManager.TryPlaceShipAt(
-                selectedCell,
-                selectedShip
-            );
+        bool placementSucceeded = gridManager.TryPlaceShipAt(selectedCell, selectedShip);
 
         if (!placementSucceeded)
         {
-            Debug.Log(
-                $"Could not place {selectedShip.ShipName} on " +
-                $"{selectedCell.GridPosition}. The tile may be occupied, " +
-                "reserved, or beside another ship."
-            );
-
             return;
         }
 
-        bool paymentSucceeded =
-            baseResourceStorage.TrySpendResources(placementCost);
+        bool paymentSucceeded = baseResourceStorage.TrySpendResources(placementCost);
 
         if (!paymentSucceeded)
         {
-            Debug.LogError(
-                $"{selectedShip.ShipName} was placed, but its resource " +
-                "cost could not be deducted.",
-                this
-            );
-
             return;
         }
 
-        // Debug.Log($"Placed {selectedShip.ShipName} for " + $"{placementCost} resources.");
+        if (!placedShipCounts.ContainsKey(selectedShip))
+        {
+            placedShipCounts[selectedShip] = 0;
+        }
+
+        placedShipCounts[selectedShip]++;
 
         selectedShip = null;
     }

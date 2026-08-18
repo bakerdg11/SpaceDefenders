@@ -17,7 +17,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   weaponType: 5
   damage: 1
-  ammunition: 500
+  ammunition: 300
   attackFireRate: 20
   attackRange: 25
   projectileSpeed: 200

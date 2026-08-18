@@ -19,9 +19,10 @@ MonoBehaviour:
   maximumHealth: 100
   movementSpeed: 5
   rotationSpeed: 200
-  heightOffset: 0.75
+  maximumPlaced: 1
   shipPlacementCost: 15
   placementRule: 1
+  heightOffset: 0.75
   weaponSlots:
   - slotName: 
     allowedWeaponTypes: 02000000

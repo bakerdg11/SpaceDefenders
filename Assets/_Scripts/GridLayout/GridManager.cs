@@ -287,7 +287,7 @@ public class GridManager : MonoBehaviour
             }
 
             /*
-             * Ignore the Viper's current cell because it will become
+             * Ignore the ship's current cell because it will become
              * empty immediately after the move.
              */
             if (adjacentCell == sourceCell)
