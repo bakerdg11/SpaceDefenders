@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ public class ShipPlacementManager : MonoBehaviour
     private ShipData selectedShip;
     [SerializeField] private BaseResourceStorage baseResourceStorage;
     private readonly Dictionary<ShipData, int> placedShipCounts = new();
+    public event Action<ShipData> ShipCountChanged;
 
     public ShipData SelectedShip => selectedShip;
     public bool IsPlacingShip => selectedShip != null;
@@ -225,6 +227,8 @@ public class ShipPlacementManager : MonoBehaviour
         }
 
         placedShipCounts[selectedShip]++;
+
+        ShipCountChanged?.Invoke(selectedShip);
 
         selectedShip = null;
     }
