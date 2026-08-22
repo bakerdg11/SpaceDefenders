@@ -139,8 +139,7 @@ public class ShipPlacementManager : MonoBehaviour
     {
         if (baseResourceStorage == null)
         {
-            baseResourceStorage =
-                FindAnyObjectByType<BaseResourceStorage>();
+            baseResourceStorage = FindAnyObjectByType<BaseResourceStorage>();
         }
     }
 

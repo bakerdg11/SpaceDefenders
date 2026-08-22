@@ -17,6 +17,7 @@ public class BaseResourceStorage : MonoBehaviour
         }
 
         storedResources += amount;
+        Debug.Log($"Deposited resources on {gameObject.name}. New total: {storedResources}");
         ResourcesChanged?.Invoke(storedResources);
     }
 
@@ -38,6 +39,7 @@ public class BaseResourceStorage : MonoBehaviour
         }
 
         storedResources -= cost;
+        Debug.Log($"Spent resources on {gameObject.name}. New total: {storedResources}");
         ResourcesChanged?.Invoke(storedResources);
 
         return true;

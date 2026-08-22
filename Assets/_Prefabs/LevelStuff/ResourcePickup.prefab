@@ -153,4 +153,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89d0064aeb2879e448a327ee6901dce8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ResourcePickup
-  resourceAmount: 10
+  resourceAmount: 2

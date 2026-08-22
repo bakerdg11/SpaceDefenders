@@ -4,26 +4,24 @@ using UnityEngine;
 
 public class HUD : MonoBehaviour
 {
-    [SerializeField] private BaseResourceStorage baseResourceStorage;
     [SerializeField] private TMP_Text resourcesHeldText;
+
+    private BaseResourceStorage baseResourceStorage;
+
+    private void Awake()
+    {
+        Debug.Log("HUD Awake is running.", this);
+    }
 
     private IEnumerator Start()
     {
-        yield return null;
-
-        if (baseResourceStorage == null)
+        while (baseResourceStorage == null)
         {
             baseResourceStorage = FindAnyObjectByType<BaseResourceStorage>();
+            yield return null;
         }
 
-        if (baseResourceStorage == null)
-        {
-            Debug.LogError("HUD could not find BaseResourceStorage.", this);
-
-            yield break;
-        }
-
-        Debug.Log($"HUD connected to: {baseResourceStorage.gameObject.name}", baseResourceStorage);
+        Debug.Log($"HUD connected to {baseResourceStorage.gameObject.name}.");
 
         baseResourceStorage.ResourcesChanged += UpdateResourcesText;
         UpdateResourcesText(baseResourceStorage.StoredResources);
@@ -39,15 +37,11 @@ public class HUD : MonoBehaviour
 
     private void UpdateResourcesText(int amount)
     {
-        Debug.Log($"HUD received resource update: {amount}");
+        Debug.Log($"HUD received resource update from {baseResourceStorage.gameObject.name}: {amount}");
 
         if (resourcesHeldText != null)
         {
             resourcesHeldText.text = $"Resources: {amount}";
-        }
-        else
-        {
-            Debug.LogError("HUD Resources Held Text is not assigned.", this);
         }
     }
 }

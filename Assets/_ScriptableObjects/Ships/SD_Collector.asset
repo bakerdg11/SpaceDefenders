@@ -19,7 +19,7 @@ MonoBehaviour:
   maximumHealth: 100
   movementSpeed: 15
   rotationSpeed: 350
-  maximumPlaced: 2
+  maximumPlaced: 5
   shipPlacementCost: 10
   placementRule: 0
   heightOffset: 0.75
