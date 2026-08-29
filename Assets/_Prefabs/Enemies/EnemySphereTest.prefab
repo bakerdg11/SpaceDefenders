@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 2363997377573097409}
   - component: {fileID: 5177873868485666724}
   - component: {fileID: 6494053549172769486}
-  - component: {fileID: 6739724280345076500}
   - component: {fileID: 1776945227941053228}
+  - component: {fileID: 6739724280345076500}
   m_Layer: 7
   m_Name: EnemySphereTest
   m_TagString: Untagged
@@ -114,21 +114,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6739724280345076500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3735607570955594006}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e8428e90cf5957499b9c16b7fbd8f24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyPatrol
-  movementSpeed: 5
-  stoppingDistance: 0.1
-  rotationSpeed: 360
 --- !u!114 &1776945227941053228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,3 +129,19 @@ MonoBehaviour:
   maximumHealth: 100
   resourcePickupPrefab: {fileID: 7475763792153353653, guid: b07b0982a25f3dd418ab04743391036c, type: 3}
   resourceDropHeightOffset: 0.5
+  resourceDropValue: 5
+--- !u!114 &6739724280345076500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3735607570955594006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e8428e90cf5957499b9c16b7fbd8f24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyPatrol
+  movementSpeed: 5
+  stoppingDistance: 0.1
+  rotationSpeed: 360

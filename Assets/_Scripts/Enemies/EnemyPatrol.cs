@@ -3,23 +3,19 @@ using UnityEngine;
 public class EnemyPatrol : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField, Min(0.1f)]
-    private float movementSpeed = 3f;
-
-    [SerializeField, Min(0.01f)]
-    private float stoppingDistance = 0.1f;
-
-    [SerializeField, Min(0f)]
-    private float rotationSpeed = 360f;
+    [SerializeField, Min(0.1f)] private float movementSpeed = 3f;
+    [SerializeField, Min(0.01f)] private float stoppingDistance = 0.1f;
+    [SerializeField, Min(0f)] private float rotationSpeed = 360f;
 
     private Transform startPoint;
     private Transform destinationPoint;
 
     private bool hasBeenInitialized;
+    private bool hasReachedDestination;
 
     private void Update()
     {
-        if (!hasBeenInitialized)
+        if (!hasBeenInitialized || hasReachedDestination)
         {
             return;
         }
@@ -27,18 +23,11 @@ public class EnemyPatrol : MonoBehaviour
         MoveToDestination();
     }
 
-    public void Initialize(
-        Transform newStartPoint,
-        Transform newDestinationPoint)
+    public void Initialize(Transform newStartPoint, Transform newDestinationPoint)
     {
-        if (newStartPoint == null ||
-            newDestinationPoint == null)
+        if (newStartPoint == null || newDestinationPoint == null)
         {
-            Debug.LogError(
-                $"{name} received invalid patrol points.",
-                this
-            );
-
+            Debug.LogError($"{name} received invalid patrol points.", this);
             return;
         }
 
@@ -47,49 +36,29 @@ public class EnemyPatrol : MonoBehaviour
 
         transform.position = startPoint.position;
 
+        hasReachedDestination = false;
         hasBeenInitialized = true;
     }
 
     private void MoveToDestination()
     {
-        Vector3 direction =
-            destinationPoint.position -
-            transform.position;
-
+        Vector3 direction = destinationPoint.position - transform.position;
         direction.y = 0f;
 
         if (direction.sqrMagnitude > 0.001f)
         {
-            Quaternion targetRotation =
-                Quaternion.LookRotation(
-                    direction.normalized,
-                    Vector3.up
-                );
-
-            transform.rotation =
-                Quaternion.RotateTowards(
-                    transform.rotation,
-                    targetRotation,
-                    rotationSpeed * Time.deltaTime
-                );
+            Quaternion targetRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        transform.position =
-            Vector3.MoveTowards(
-                transform.position,
-                destinationPoint.position,
-                movementSpeed * Time.deltaTime
-            );
+        transform.position = Vector3.MoveTowards(transform.position, destinationPoint.position, movementSpeed * Time.deltaTime);
 
-        float distanceToDestination =
-            Vector3.Distance(
-                transform.position,
-                destinationPoint.position
-            );
+        float distanceToDestination = Vector3.Distance(transform.position, destinationPoint.position);
 
         if (distanceToDestination <= stoppingDistance)
         {
-            Destroy(gameObject);
+            transform.position = destinationPoint.position;
+            hasReachedDestination = true;
         }
     }
 }

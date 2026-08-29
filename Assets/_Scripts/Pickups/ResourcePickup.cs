@@ -17,6 +17,11 @@ public class ResourcePickup : MonoBehaviour
         ResourceManager.UnregisterResource(this);
     }
 
+    public void SetResourceAmount(int newAmount)
+    {
+        resourceAmount = Mathf.Max(1, newAmount);
+    }
+
     public bool TryReserve()
     {
         if (IsReserved)

@@ -5,15 +5,17 @@ public class EnemyHealth : MonoBehaviour
 {
     [Header("Health")]
     [SerializeField] private float maximumHealth = 100f;
-    private float currentHealth;
-    private bool isDead;
-    public float CurrentHealth => currentHealth;
-    public float MaximumHealth => maximumHealth;
 
     [Header("Resource Drop")]
     [SerializeField] private ResourcePickup resourcePickupPrefab;
     [SerializeField] private float resourceDropHeightOffset = 0.5f;
+    [SerializeField, Min(0)] private int resourceDropValue = 10;
 
+    private float currentHealth;
+    private bool isDead;
+
+    public float CurrentHealth => currentHealth;
+    public float MaximumHealth => maximumHealth;
 
     private void Awake()
     {
@@ -42,7 +44,16 @@ public class EnemyHealth : MonoBehaviour
             return;
         }
 
+        isDead = true;
+
         DropResource();
+
+        EnemyBaseShip enemyBaseShip = GetComponent<EnemyBaseShip>();
+
+        if (enemyBaseShip != null)
+        {
+            enemyBaseShip.NotifyDestroyed();
+        }
 
         Destroy(gameObject);
     }
@@ -56,9 +67,8 @@ public class EnemyHealth : MonoBehaviour
         }
 
         Vector3 dropPosition = transform.position + Vector3.up * resourceDropHeightOffset;
-        Instantiate(resourcePickupPrefab, dropPosition, Quaternion.identity);
+        ResourcePickup spawnedPickup = Instantiate(resourcePickupPrefab, dropPosition, Quaternion.identity);
 
+        spawnedPickup.SetResourceAmount(resourceDropValue);
     }
-
-
 }
