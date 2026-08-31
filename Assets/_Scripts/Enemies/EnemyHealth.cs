@@ -1,30 +1,34 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
 {
-    [Header("Health")]
-    [SerializeField] private float maximumHealth = 100f;
+    private EnemyShipData shipData;
+    private float currentHealth;
+    private bool isDead;
 
     [Header("Resource Drop")]
     [SerializeField] private ResourcePickup resourcePickupPrefab;
     [SerializeField] private float resourceDropHeightOffset = 0.5f;
-    [SerializeField, Min(0)] private int resourceDropValue = 10;
-
-    private float currentHealth;
-    private bool isDead;
 
     public float CurrentHealth => currentHealth;
-    public float MaximumHealth => maximumHealth;
+    public float MaximumHealth => shipData != null ? shipData.MaximumHealth : 0f;
 
-    private void Awake()
+    public void Initialize(EnemyShipData newShipData)
     {
-        currentHealth = maximumHealth;
+        if (newShipData == null)
+        {
+            Debug.LogError($"{name} received invalid EnemyShipData.", this);
+            return;
+        }
+
+        shipData = newShipData;
+        currentHealth = shipData.MaximumHealth;
+        isDead = false;
     }
 
     public void TakeDamage(float damage)
     {
-        if (damage <= 0f || currentHealth <= 0f)
+        if (damage <= 0f || isDead)
         {
             return;
         }
@@ -66,9 +70,15 @@ public class EnemyHealth : MonoBehaviour
             return;
         }
 
-        Vector3 dropPosition = transform.position + Vector3.up * resourceDropHeightOffset;
-        ResourcePickup spawnedPickup = Instantiate(resourcePickupPrefab, dropPosition, Quaternion.identity);
+        if (shipData == null)
+        {
+            Debug.LogWarning($"{name} has no EnemyShipData assigned.", this);
+            return;
+        }
 
-        spawnedPickup.SetResourceAmount(resourceDropValue);
+        Vector3 dropPosition = transform.position + Vector3.up * resourceDropHeightOffset;
+
+        ResourcePickup spawnedPickup = Instantiate(resourcePickupPrefab, dropPosition, Quaternion.identity);
+        spawnedPickup.SetResourceAmount(shipData.ResourceDropValue);
     }
 }

@@ -1,9 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(
-    fileName = "NewShipData",
-    menuName = "Ships/Ship Data"
-)]
+[CreateAssetMenu(fileName = "NewShipData", menuName = "Ships/Ship Data")]
 public class ShipData : ScriptableObject
 {
     [Header("Identity")]

@@ -29367,6 +29367,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3801606705315536990}
+  - component: {fileID: 3823753457448898239}
+  - component: {fileID: -4495208798418981681}
   m_Layer: 8
   m_Name: EnemyViperFromBaseShip
   m_TagString: Untagged
@@ -29400,6 +29402,32 @@ Transform:
   - {fileID: 3801606705516055685}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3823753457448898239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4578425261336509156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115e9a3ec01d5784c8cf8c25751d6626, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  resourcePickupPrefab: {fileID: 7475763792153353653, guid: b07b0982a25f3dd418ab04743391036c, type: 3}
+  resourceDropHeightOffset: 0.5
+--- !u!114 &-4495208798418981681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4578425261336509156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e8428e90cf5957499b9c16b7fbd8f24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
 --- !u!1 &4578425262076024383
 GameObject:
   m_ObjectHideFlags: 0

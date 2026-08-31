@@ -4,28 +4,30 @@ using UnityEngine;
 public class EnemyBaseSpawner : MonoBehaviour
 {
     [Header("Enemy Base")]
-    [SerializeField] private GameObject enemyBaseShipPrefab;
+    [SerializeField] private EnemyShipData enemyBaseShipData;
 
     [Header("Spawn Locations")]
     [SerializeField] private Transform spawnPoint3;
     [SerializeField] private Transform spawnPoint9;
 
-    [Header("Destination Locations")]
+    [Header("Base Destination Locations")]
     [SerializeField] private Transform destinationPoint1;
     [SerializeField] private Transform destinationPoint2;
 
+    [Header("Deployed Ship Destination")]
+    [SerializeField] private Transform deployedShipDestination;
+
     [Header("Spawn Settings")]
     [SerializeField, Min(0f)] private float respawnDelay = 15f;
-    [SerializeField] private bool spawnFromBothLocations = false;
+    [SerializeField] private bool spawnFromBothLocations;
 
     private EnemyBaseShip activeBase1;
     private EnemyBaseShip activeBase2;
+
     private Coroutine singleBaseRespawnCoroutine;
 
     private void Start()
     {
-        Debug.Log("EnemyBaseSpawner Start is running.", this);
-
         if (spawnFromBothLocations)
         {
             SpawnBaseAtLane1();
@@ -41,66 +43,48 @@ public class EnemyBaseSpawner : MonoBehaviour
     {
         if (Random.Range(0, 2) == 0)
         {
-            Debug.Log("Enemy Base selected Lane 1.", this);
             SpawnBaseAtLane1();
         }
         else
         {
-            Debug.Log("Enemy Base selected Lane 2.", this);
             SpawnBaseAtLane2();
         }
     }
 
     private void SpawnBaseAtLane1()
     {
-        if (enemyBaseShipPrefab == null || spawnPoint3 == null || destinationPoint1 == null)
-        {
-            Debug.LogError("Enemy Base Spawner is missing a Lane 1 reference.", this);
-            return;
-        }
-
-        GameObject spawnedBase = Instantiate(enemyBaseShipPrefab, spawnPoint3.position, spawnPoint3.rotation);
-
-        EnemyPatrol enemyPatrol = spawnedBase.GetComponent<EnemyPatrol>();
-        EnemyBaseShip enemyBaseShip = spawnedBase.GetComponent<EnemyBaseShip>();
-
-        if (enemyPatrol == null || enemyBaseShip == null)
-        {
-            Debug.LogError("Enemy Base Ship prefab is missing EnemyPatrol or EnemyBaseShip.", spawnedBase);
-            Destroy(spawnedBase);
-            return;
-        }
-
-        activeBase1 = enemyBaseShip;
-
-        enemyBaseShip.Initialize(this, 1);
-        enemyPatrol.Initialize(spawnPoint3, destinationPoint1);
+        activeBase1 = SpawnBase(enemyBaseShipData, spawnPoint3, destinationPoint1, 1);
     }
 
     private void SpawnBaseAtLane2()
     {
-        if (enemyBaseShipPrefab == null || spawnPoint9 == null || destinationPoint2 == null)
+        activeBase2 = SpawnBase(enemyBaseShipData, spawnPoint9, destinationPoint2, 2);
+    }
+
+    private EnemyBaseShip SpawnBase(EnemyShipData shipData, Transform spawnPoint, Transform destinationPoint, int lane)
+    {
+        if (shipData == null || shipData.ShipPrefab == null || spawnPoint == null || destinationPoint == null)
         {
-            Debug.LogError("Enemy Base Spawner is missing a Lane 2 reference.", this);
-            return;
+            Debug.LogError($"Enemy Base Spawner is missing required Lane {lane} data.", this);
+            return null;
         }
 
-        GameObject spawnedBase = Instantiate(enemyBaseShipPrefab, spawnPoint9.position, spawnPoint9.rotation);
+        GameObject spawnedBase = Instantiate(shipData.ShipPrefab, spawnPoint.position, spawnPoint.rotation);
 
-        EnemyPatrol enemyPatrol = spawnedBase.GetComponent<EnemyPatrol>();
+        EnemyController enemyController = spawnedBase.GetComponent<EnemyController>();
         EnemyBaseShip enemyBaseShip = spawnedBase.GetComponent<EnemyBaseShip>();
 
-        if (enemyPatrol == null || enemyBaseShip == null)
+        if (enemyController == null || enemyBaseShip == null)
         {
-            Debug.LogError("Enemy Base Ship prefab is missing EnemyPatrol or EnemyBaseShip.", spawnedBase);
+            Debug.LogError("Enemy Base prefab is missing EnemyController or EnemyBaseShip.", spawnedBase);
             Destroy(spawnedBase);
-            return;
+            return null;
         }
 
-        activeBase2 = enemyBaseShip;
+        enemyBaseShip.Initialize(this, lane, deployedShipDestination);
+        enemyController.Initialize(shipData, spawnPoint, destinationPoint);
 
-        enemyBaseShip.Initialize(this, 2);
-        enemyPatrol.Initialize(spawnPoint9, destinationPoint2);
+        return enemyBaseShip;
     }
 
     public void NotifyBaseDestroyed(int lane)
@@ -129,6 +113,7 @@ public class EnemyBaseSpawner : MonoBehaviour
         yield return new WaitForSeconds(respawnDelay);
 
         SpawnRandomBase();
+
         singleBaseRespawnCoroutine = null;
     }
 

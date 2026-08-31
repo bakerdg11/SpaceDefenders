@@ -218,7 +218,7 @@ public class ShipRelocationManager : MonoBehaviour
 
     private GridCell FindCellContainingShip(GameObject ship)
     {
-        GridCell[] cells = FindObjectsByType<GridCell>(FindObjectsSortMode.None);
+        GridCell[] cells = FindObjectsByType<GridCell>();
 
         foreach (GridCell cell in cells)
         {
